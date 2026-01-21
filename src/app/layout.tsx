@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mathijs | Full-Stack Developer",
+  title: "Novum Digital | Premium Web Development",
   description:
-    "I craft exceptional digital experiences through clean code and creative problem-solving. Specialized in building modern web applications.",
+    "High-end web solutions specialized in medical and corporate platforms. Crafting exceptional digital experiences.",
   keywords: [
     "developer",
-    "full-stack",
     "web development",
+    "Novum Digital",
     "React",
     "Next.js",
     "TypeScript",
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Mathijs" }],
   openGraph: {
-    title: "Mathijs | Full-Stack Developer",
+    title: "Novum Digital | Premium Web Development",
     description:
-      "I craft exceptional digital experiences through clean code and creative problem-solving.",
+      "High-end web solutions specialized in medical and corporate platforms.",
     type: "website",
   },
 };

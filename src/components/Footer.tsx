@@ -49,12 +49,12 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
           <a href="#hero" className="text-2xl font-bold text-gradient">
-            MK
+            Novum
           </a>
 
           {/* Copyright */}
           <p className="text-muted text-sm text-center">
-            © {currentYear} Mathijs. All rights reserved.
+            © {currentYear} Novum Digital. All rights reserved.
           </p>
 
           {/* Back to top */}

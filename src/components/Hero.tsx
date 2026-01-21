@@ -131,7 +131,7 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto text-center">
         <p className="text-accent font-mono text-sm mb-4 tracking-wider">
-          FULL-STACK DEVELOPER
+          Crafting Digital Experiences
         </p>
 
         <h1
@@ -139,7 +139,7 @@ export default function Hero() {
           className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
           style={{ perspective: "1000px" }}
         >
-          Hi, I&apos;m Mathijs
+          Hi, We&apos;re Novum
         </h1>
 
         <p
@@ -147,7 +147,7 @@ export default function Hero() {
           className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-12"
           style={{ opacity: 0 }}
         >
-          I craft exceptional digital experiences through clean code and
+          We craft exceptional digital experiences through clean code and
           creative problem-solving. Specialized in building modern web
           applications that users love.
         </p>
@@ -161,7 +161,7 @@ export default function Hero() {
             href="#projects"
             className="group flex items-center gap-2 px-8 py-4 bg-accent text-white rounded-full font-medium hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25 transition-all duration-300"
           >
-            View My Work
+            View Our Work
             <svg
               className="w-5 h-5 group-hover:translate-x-1 transition-transform"
               fill="none"

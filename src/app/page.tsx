@@ -51,7 +51,7 @@ export default function Home() {
           id="about-projects-transition"
           height={100}
           title="PORTFOLIO"
-          subtitle="Discover the projects that define my craft"
+          subtitle="Discover the projects that define our craft"
           colors={["#3b82f6", "#8b5cf6", "#60a5fa", "#06b6d4"]}
         />
 

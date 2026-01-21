@@ -130,7 +130,7 @@ export default function About() {
               style={{ opacity: 0 }}
             >
               About{" "}
-              <span className="text-gradient">Me</span>
+              <span className="text-gradient">Us</span>
             </h2>
 
             <div className="space-y-6 text-muted text-lg">
@@ -138,7 +138,7 @@ export default function About() {
                 ref={(el) => { textRefs.current[0] = el; }}
                 style={{ opacity: 0 }}
               >
-                With over 5 years of experience in web development, I&apos;ve
+                With over 5 years of experience in web development, We&apos;ve
                 had the privilege of working with startups and established
                 companies alike, helping them bring their digital visions to
                 life.
@@ -148,8 +148,8 @@ export default function About() {
                 ref={(el) => { textRefs.current[1] = el; }}
                 style={{ opacity: 0 }}
               >
-                My passion lies in creating seamless user experiences that
-                combine beautiful design with robust functionality. I believe
+                Our passion lies in creating seamless user experiences that
+                combine beautiful design with robust functionality. We believe
                 that great software should feel invisible—it should just work.
               </p>
 
@@ -157,7 +157,7 @@ export default function About() {
                 ref={(el) => { textRefs.current[2] = el; }}
                 style={{ opacity: 0 }}
               >
-                When I&apos;m not coding, you&apos;ll find me exploring new
+                When we&apos;re not coding, you&apos;ll find us exploring new
                 technologies, contributing to open-source projects, or sharing
                 knowledge with the developer community.
               </p>

@@ -90,7 +90,7 @@ export default function Navigation() {
           onClick={(e) => handleNavClick(e, "#hero")}
           className="text-2xl font-bold text-gradient"
         >
-          MK
+          Novum
         </a>
 
         {/* Desktop Navigation */}

@@ -121,7 +121,7 @@ export default function Projects() {
             Projects
           </h2>
           <p className="text-lg text-gray-600 max-w-md">
-            A selection of projects that showcase my expertise in building
+            A selection of projects that showcase our expertise in building
             scalable, user-centric digital solutions.
           </p>
           <div className="mt-8 flex items-center gap-4">

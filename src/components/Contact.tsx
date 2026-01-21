@@ -298,10 +298,10 @@ export default function Contact() {
                 <div>
                   <h3 className="font-medium mb-1">Email</h3>
                   <a
-                    href="mailto:hello@mathijs.dev"
+                    href="mailto:info@novumdigital.nl"
                     className="text-muted hover:text-accent transition-colors"
                   >
-                    hello@mathijs.dev
+                    info@novumdigital.nl
                   </a>
                 </div>
               </div>
