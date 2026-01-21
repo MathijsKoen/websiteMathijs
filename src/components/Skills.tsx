@@ -36,32 +36,132 @@ const skills = [
   },
 ];
 
-const technologies = [
-  "JavaScript",
-  "TypeScript",
-  "React",
-  "Next.js",
-  "Vue.js",
-  "Node.js",
-  "Python",
-  "PostgreSQL",
-  "MongoDB",
-  "Redis",
-  "GraphQL",
-  "REST APIs",
-  "Docker",
-  "Kubernetes",
-  "AWS",
-  "Vercel",
-  "Git",
-  "Figma",
-];
-
 export default function Skills() {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const skillsRef = useRef<HTMLDivElement>(null);
-  const marqueeRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Dynamic Orb Background (matching site style)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+
+    const resize = () => {
+        canvas.width = window.innerWidth * window.devicePixelRatio;
+        canvas.height = window.innerHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        w = window.innerWidth;
+        h = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    
+    // Orbs
+    interface Orb {
+        x: number;
+        y: number;
+        baseX: number;
+        baseY: number;
+        size: number;
+        color: string;
+        speed: number;
+        angle: number;
+        depth: number;
+    }
+    
+    const orbs: Orb[] = [];
+    const colors = ["#06b6d4", "#3b82f6", "#8b5cf6", "#ffffff"];
+    
+    for(let i=0; i<40; i++) {
+        const x = Math.random() * w;
+        const y = Math.random() * h;
+        orbs.push({
+            x, y,
+            baseX: x,
+            baseY: y,
+            size: Math.random() * 2.5 + 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            speed: 0.0003 + Math.random() * 0.0007,
+            angle: Math.random() * Math.PI * 2,
+            depth: Math.random() * 20 + 5
+        });
+    }
+
+    let mouseX = 0;
+    let mouseY = 0;
+    const handleMouse = (e: MouseEvent) => {
+        mouseX = (e.clientX / w) * 2 - 1;
+        mouseY = (e.clientY / h) * 2 - 1;
+    };
+    window.addEventListener('mousemove', handleMouse);
+
+    let animId: number;
+    const render = () => {
+        ctx.clearRect(0, 0, w, h);
+        
+        const time = Date.now() * 0.001;
+
+        orbs.forEach(orb => {
+            orb.angle += orb.speed;
+            
+            // Gentle orbital motion
+            const floatX = Math.sin(orb.angle) * 30;
+            const floatY = Math.cos(orb.angle * 0.8) * 20;
+            
+            // Mouse parallax
+            const parallaxX = mouseX * orb.depth * -0.5;
+            const parallaxY = mouseY * orb.depth * -0.5;
+            
+            const drawX = orb.baseX + floatX + parallaxX;
+            const drawY = orb.baseY + floatY + parallaxY;
+            
+            // Breathing
+            const breathe = 1 + Math.sin(time * 2 + orb.angle) * 0.15;
+            const size = orb.size * breathe;
+
+            // Glow
+            const gradient = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, size * 4);
+            gradient.addColorStop(0, `${orb.color}40`);
+            gradient.addColorStop(0.5, `${orb.color}10`);
+            gradient.addColorStop(1, "transparent");
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, size * 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Core
+            ctx.fillStyle = orb.color;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, size, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Center
+            ctx.fillStyle = "#ffffff";
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, size * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.globalAlpha = 1;
+        });
+
+        animId = requestAnimationFrame(render);
+    };
+    render();
+
+    return () => {
+        window.removeEventListener('resize', resize);
+        window.removeEventListener('mousemove', handleMouse);
+        cancelAnimationFrame(animId);
+    };
+  }, []);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -155,24 +255,6 @@ export default function Skills() {
           }
         );
       });
-
-      // Infinite marquee animation
-      const marquee = marqueeRef.current;
-      if (marquee) {
-        const marqueeContent = marquee.querySelector(".marquee-content");
-        if (marqueeContent) {
-          // Clone content for seamless loop
-          const clone = marqueeContent.cloneNode(true);
-          marquee.appendChild(clone);
-
-          gsap.to([marqueeContent, clone], {
-            xPercent: -100,
-            repeat: -1,
-            duration: 30,
-            ease: "none",
-          });
-        }
-      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -182,56 +264,52 @@ export default function Skills() {
     <section
       ref={sectionRef}
       id="skills"
-      className="relative py-12 px-6 overflow-hidden bg-surface"
+      className="relative py-8 px-6 overflow-hidden flex flex-col justify-center min-h-[80vh]"
     >
-      {/* Background elements */}
-      <div className="absolute top-1/2 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-64 h-64 bg-accent-light/10 rounded-full blur-3xl" />
-      <div className="absolute top-1/4 right-1/4 w-48 h-48 bg-accent/5 rounded-full blur-2xl" />
+      <canvas 
+        ref={canvasRef} 
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-40"
+      />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative z-10 w-full">
         {/* Title */}
-        <div ref={titleRef} className="text-center mb-16" style={{ opacity: 0 }}>
-          <p className="text-accent font-mono text-sm mb-4 tracking-wider">
+        <div ref={titleRef} className="text-center mb-8" style={{ opacity: 0 }}>
+          <p className="text-accent font-mono text-xs mb-2 tracking-wider">
             EXPERTISE
           </p>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
             Skills &{" "}
             <span className="text-gradient">Technologies</span>
           </h2>
-          <p className="text-muted text-lg mt-4 max-w-2xl mx-auto">
-            I&apos;m constantly learning and staying up-to-date with the latest
-            technologies to deliver the best solutions.
-          </p>
         </div>
 
         {/* Skills Grid */}
         <div
           ref={skillsRef}
-          className="grid md:grid-cols-3 gap-8 mb-20"
+          className="grid md:grid-cols-3 gap-6 mb-10"
           style={{ perspective: "1000px" }}
         >
           {skills.map((category, categoryIndex) => (
             <div
               key={category.category}
-              className="skill-category glass rounded-2xl p-6 md:p-8"
+              className="skill-category glass rounded-xl p-5"
               style={{ opacity: 0 }}
             >
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
-                <span className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center text-accent text-sm">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-accent/20 flex items-center justify-center text-accent text-xs">
                   {categoryIndex + 1}
                 </span>
                 {category.category}
               </h3>
 
-              <div className="space-y-5">
+              <div className="space-y-3">
                 {category.items.map((skill) => (
                   <div key={skill.name}>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">{skill.name}</span>
-                      <span className="text-sm text-muted">{skill.level}%</span>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-xs font-medium">{skill.name}</span>
+                      <span className="text-xs text-muted">{skill.level}%</span>
                     </div>
-                    <div className="skill-bar">
+                    <div className="skill-bar h-1">
                       <div
                         className="skill-bar-fill"
                         data-level={skill.level}
@@ -245,75 +323,29 @@ export default function Skills() {
           ))}
         </div>
 
-        {/* Technology Marquee */}
-        <div className="relative">
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
-
-          <div
-            ref={marqueeRef}
-            className="flex overflow-hidden py-8"
-          >
-            <div className="marquee-content flex gap-8 items-center">
-              {technologies.map((tech, index) => (
-                <div
-                  key={`${tech}-${index}`}
-                  className="flex items-center gap-2 px-6 py-3 glass rounded-full whitespace-nowrap"
-                >
-                  <span className="w-2 h-2 bg-accent rounded-full" />
-                  <span className="text-sm font-medium">{tech}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Additional info */}
-        <div className="grid md:grid-cols-2 gap-8 mt-20">
-          <div className="glass rounded-2xl p-6 md:p-8">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
-              <svg
-                className="w-6 h-6 text-accent"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
+        {/* Core Services Grid - Replaces Skills Marquee */}
+        <div className="grid md:grid-cols-2 gap-6 mt-10">
+          <div className="glass rounded-xl p-6 hover:bg-accent/5 transition-colors duration-300">
+            <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+              <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              Always Learning
+              Problem Solving
             </h3>
-            <p className="text-muted">
-              I dedicate time every week to learning new technologies and
-              improving my skills. Currently exploring AI/ML integration and
-              Web3 technologies.
+            <p className="text-sm text-muted">
+              I break down complex challenges into manageable, scalable technical solutions. From architecture to implementation, every step is calculated.
             </p>
           </div>
 
-          <div className="glass rounded-2xl p-6 md:p-8">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
-              <svg
-                className="w-6 h-6 text-accent"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
+          <div className="glass rounded-xl p-6 hover:bg-accent/5 transition-colors duration-300">
+            <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+               <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Team Player
+              High Performance
             </h3>
-            <p className="text-muted">
-              I thrive in collaborative environments and have experience leading
-              teams, conducting code reviews, and mentoring junior developers.
+            <p className="text-sm text-muted">
+              Building applications that are fast, responsive, and optimized for the best user experience and SEO rankings.
             </p>
           </div>
         </div>

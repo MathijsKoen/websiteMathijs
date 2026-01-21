@@ -94,18 +94,18 @@ export default function TextExplosionTransition({
         const angle = (i / 200) * Math.PI * 2;
         const moveAngle = angle + (seededRandom(seed + 1) - 0.5); // Slight randomness to direction
         
-        // Swap: Start near center (Inside), Target far away (Outside)
+        // Start near center (Inside), Target within container bounds
         const startRad = 50 + seededRandom(seed + 3) * 100;
         
-        // REDUCED: Target is now just outside the visible text area, but not totally off-screen
-        const maxDimension = Math.max(rect.width, rect.height);
-        const endRad = maxDimension * (0.35 + seededRandom(seed + 2) * 0.25); // ~35% - 60% of screen
+        // Keep particles within visible container bounds
+        const maxDimension = Math.min(rect.width, rect.height) * 0.4;
+        const endRad = maxDimension * (0.5 + seededRandom(seed + 2) * 0.4); // Stay within ~40% of container
 
         const startX = centerX + Math.cos(angle) * startRad;
         const startY = centerY + Math.sin(angle) * (startRad * 0.6); // Oval shape
         
         const targetX = centerX + Math.cos(moveAngle) * endRad;
-        const targetY = centerY + Math.sin(moveAngle) * (endRad * 0.8); // Slightly oval explosion
+        const targetY = centerY + Math.sin(moveAngle) * (endRad * 0.6); // Keep oval, stay within bounds
 
         particles.push({
           x: startX,
@@ -122,26 +122,29 @@ export default function TextExplosionTransition({
         });
       }
 
+      // Calculate max safe radius to keep particles within container
+      const maxSafeRadius = Math.min(rect.width, rect.height) * 0.35;
+
       for (let ring = 0; ring < 3; ring++) {
-        // Dispersed rings - no longer perfect circles
-        const baseRadius = 150 + ring * 80;
+        // Dispersed rings - scaled to fit within container
+        const baseRadius = Math.min(100 + ring * 50, maxSafeRadius * (0.5 + ring * 0.15));
         const particlesInRing = 30 + ring * 10;
         
         for (let i = 0; i < particlesInRing; i++) {
           const angle = (i / particlesInRing) * Math.PI * 2;
           // Fix: Ensure random seed isn't zero for first ring (ring=0)
           // Increased randomness for more dispersion
-          const randomOffset = seededRandom(i * (ring + 1) * 123 + i) * 100 - 50; 
+          const randomOffset = seededRandom(i * (ring + 1) * 123 + i) * 40 - 20; 
           const randomAngleOffset = (seededRandom(i * (ring + 1) * 456 + i) - 0.5) * 0.6; 
 
-          const r = baseRadius + randomOffset;
+          const r = Math.min(baseRadius + randomOffset, maxSafeRadius);
           const a = angle + randomAngleOffset;
           
           particles.push({
             x: centerX,
             y: centerY,
             targetX: centerX + Math.cos(a) * r,
-            targetY: centerY + Math.sin(a) * r,
+            targetY: centerY + Math.sin(a) * r * 0.7, // Keep vertically contained
             startX: centerX,
             startY: centerY,
             size: 3 + ring,
@@ -250,7 +253,7 @@ export default function TextExplosionTransition({
         }
 
         // Show trails during movement phase
-        if (currentProgress > 0.1 && currentProgress < 0.9) {
+        if (currentProgress > 0.1 && currentProgress < 0.8) {
           p.trail.forEach((t, i) => {
             const alpha = (1 - i / p.trail.length) * 0.3 * (1 - Math.abs(currentProgress - 0.5) * 2 * 0.5); 
             // Fade trails at start and end
@@ -263,27 +266,50 @@ export default function TextExplosionTransition({
           });
         }
 
-        const time = Date.now();
-        const glowSize = p.size * (1 + Math.sin(time * 0.01 + p.angle) * 0.3);
-        
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowSize * 3);
-        gradient.addColorStop(0, `${p.color}60`);
-        gradient.addColorStop(0.5, `${p.color}20`);
-        gradient.addColorStop(1, "transparent");
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, glowSize * 3, 0, Math.PI * 2);
-        ctx.fill();
+        // GENTLE FADE OUT
+        // When progress > 0.7, particles gently fade out while staying in place
+        let renderX = p.x;
+        let renderY = p.y;
+        let scale = 1;
+        let alpha = 1;
 
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
-        ctx.fill();
+        if (currentProgress > 0.7) {
+           const exitProgress = (currentProgress - 0.7) / 0.3; // 0 to 1
+           
+           // Gentle scale down
+           scale = 1 - exitProgress * 0.3;
+           
+           // Smooth fade out
+           alpha = 1 - Math.pow(exitProgress, 2);
+        }
 
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, glowSize * 0.3, 0, Math.PI * 2);
-        ctx.fill();
+        if (alpha > 0.01) {
+            const time = Date.now();
+            const glowSize = p.size * (1 + Math.sin(time * 0.01 + p.angle) * 0.3) * scale;
+            
+            ctx.globalAlpha = alpha;
+            
+            const gradient = ctx.createRadialGradient(renderX, renderY, 0, renderX, renderY, glowSize * 3);
+            gradient.addColorStop(0, `${p.color}60`);
+            gradient.addColorStop(0.5, `${p.color}20`);
+            gradient.addColorStop(1, "transparent");
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(renderX, renderY, glowSize * 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(renderX, renderY, glowSize, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(renderX, renderY, glowSize * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.globalAlpha = 1;
+        }
       });
 
       // Show central glow during animation phase only
@@ -348,7 +374,7 @@ export default function TextExplosionTransition({
   const chars = title.split("");
 
   return (
-    <div ref={containerRef} id={id} className="relative overflow-hidden bg-gradient-to-b from-transparent via-accent/5 to-transparent" style={{ minHeight: `${height}vh` }}>
+    <div ref={containerRef} id={id} className="relative overflow-hidden" style={{ minHeight: `${height}vh` }}>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
       <div className="relative z-10 flex flex-col items-center justify-center min-h-full py-20 px-6">
         <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold text-center" style={{ perspective: "1000px" }}>
@@ -372,7 +398,6 @@ export default function TextExplosionTransition({
         </h2>
         {subtitle && <p ref={subtitleRef} className="mt-6 text-xl md:text-2xl text-muted max-w-2xl text-center opacity-0">{subtitle}</p>}
       </div>
-      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at center, transparent 0%, var(--background) 80%)" }} />
     </div>
   );
 }

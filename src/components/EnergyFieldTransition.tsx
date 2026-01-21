@@ -117,18 +117,8 @@ export default function EnergyFieldTransition({
       const centerX = width / 2;
       const centerY = height / 2;
 
-      // Draw energy field gradient background
-      if (progress > 0.1) {
-        const fieldGradient = ctx.createRadialGradient(
-          centerX, centerY, 0,
-          centerX, centerY, Math.max(width, height) * 0.6 * progress
-        );
-        fieldGradient.addColorStop(0, `${colors[0]}15`);
-        fieldGradient.addColorStop(0.5, `${colors[1]}08`);
-        fieldGradient.addColorStop(1, "transparent");
-        ctx.fillStyle = fieldGradient;
-        ctx.fillRect(0, 0, width, height);
-      }
+      // Background gradient removed to match site theme
+      // The canvas remains transparent so only the energy lines/effects are visible
 
       // Create pulse rings
       if (progress > 0.2 && time - lastPulse > 0.8) {
@@ -282,20 +272,29 @@ export default function EnergyFieldTransition({
 
     const trigger = ScrollTrigger.create({
       trigger: container,
-      start: "top 80%",
-      end: "bottom bottom", // Extended end for full scroll range
-      scrub: 1, // Increased scrub for smoother heavy feel
+      start: "top bottom", // Start immediately when section enters view
+      end: "center center", // Finish when centered
+      scrub: 1, 
       onUpdate: (self) => {
         progress = self.progress;
         
-        const textProgress = Math.max(0, (progress - 0.2) / 0.5);
+        // Linear progress for text (removed acceleration)
+        // This makes the text reveal slower and smoother across the full scroll distance
+        const textProgress = progress; 
+        
         const newStates = words.map((_, i) => {
-          const wordProgress = Math.max(0, Math.min(1, (textProgress * words.length - i * 0.8) / 1.2));
-          const eased = 1 - Math.pow(1 - wordProgress, 4);
+          // Simplified progressive reveal
+          // i * 0.1 is delay
+          // wordProgress goes 0->1
+          const start = i * 0.15;
+          const end = start + 0.4;
+          const wp = (textProgress - start) / (end - start);
+          const clamped = Math.max(0, Math.min(1, wp));
+          
           return {
-            y: 80 * (1 - eased),
-            opacity: eased,
-            scale: 0.8 + 0.2 * eased,
+            y: 80 * (1 - clamped),
+            opacity: clamped,
+            scale: 0.8 + 0.2 * clamped,
           };
         });
         setWordStates(newStates);
@@ -320,28 +319,25 @@ export default function EnergyFieldTransition({
     <div
       ref={containerRef}
       id={id}
-      className="relative overflow-hidden"
+      className="relative overflow-hidden flex flex-col items-center justify-center"
       style={{ minHeight: `${height}vh` }}
     >
       {/* Canvas for energy field */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
       {/* Central content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-full py-20 px-6">
-        {/* Background blur for text readability */}
-        <div 
-          className="absolute inset-0 flex items-center justify-center"
-          style={{
-            background: "radial-gradient(ellipse 60% 40% at center, var(--background) 0%, transparent 70%)",
-          }}
-        />
-        <h2
-          className="relative text-5xl md:text-7xl lg:text-8xl font-bold text-center leading-tight flex flex-wrap justify-center gap-x-4"
-          style={{
-            color: "var(--foreground)",
-            textShadow: `0 0 40px var(--background), 0 0 80px var(--background), 0 2px 4px rgba(0,0,0,0.1)`,
-          }}
-        >
+      <div className="relative z-10 w-full px-6 text-center">
+        {/* Background blur removed for seamless integration */}
+        
+        <div className="flex flex-col items-center justify-center w-full">
+            <h2
+              className="relative text-5xl md:text-7xl lg:text-8xl font-bold text-center leading-tight flex flex-wrap justify-center gap-x-4"
+              style={{
+                color: "var(--foreground)",
+                // Reduced text shadow to avoid hard background blocks
+                textShadow: `0 2px 4px rgba(0,0,0,0.1)`,
+              }}
+            >
           {words.map((word, i) => (
             <span
               key={i}
@@ -373,22 +369,17 @@ export default function EnergyFieldTransition({
 
         {/* Animated underline */}
         <div
-          className="mt-10 h-0.5 rounded-full"
+          className="mt-10 h-0.5 rounded-full mx-auto"
           style={{
             width: mounted ? `${Math.min(wordStates[0]?.opacity || 0, 1) * 200}px` : "0px",
             background: `linear-gradient(90deg, transparent, ${colors[0]}, ${colors[1]}, transparent)`,
             transition: "width 0.3s ease-out",
           }}
         />
+        </div>
       </div>
 
-      {/* Vignette */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse at center, transparent 40%, var(--background) 100%)",
-        }}
-      />
+      {/* Vignette removed for seamless integration */}
     </div>
   );
 }

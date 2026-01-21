@@ -44,8 +44,164 @@ const projects = [
 export default function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null); // New Canvas Ref
   const [activeCard, setActiveCard] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+
+  // Canvas Effect - Dynamic Orbs (matching OrbTransition/Expertise style)
+  useEffect(() => {
+      const canvas = canvasRef.current;
+      const container = triggerRef.current;
+      if (!canvas || !container) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      
+      const resize = () => {
+          width = canvas.width = window.innerWidth * window.devicePixelRatio;
+          height = canvas.height = window.innerHeight * window.devicePixelRatio;
+          ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      };
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Orb Particles - EXACT same style as OrbTransition
+      interface Orb {
+          x: number;
+          y: number;
+          baseX: number;
+          baseY: number;
+          size: number;
+          color: string;
+          speed: number;
+          angle: number;
+          noiseOffset: number;
+          depth: number;
+      }
+      
+      const orbs: Orb[] = [];
+      const orbCount = 50;
+      const colors = ["#3b82f6", "#8b5cf6", "#06b6d4", "#ffffff"];
+      
+      for(let i=0; i<orbCount; i++) {
+          const baseX = Math.random() * window.innerWidth;
+          const baseY = Math.random() * window.innerHeight;
+          orbs.push({
+              x: baseX,
+              y: baseY,
+              baseX,
+              baseY,
+              size: Math.random() * 2.5 + 1.5,
+              color: colors[Math.floor(Math.random() * colors.length)],
+              speed: 0.0003 + Math.random() * 0.0008,
+              angle: Math.random() * Math.PI * 2,
+              noiseOffset: Math.random() * 100,
+              depth: Math.random() * 25 + 10
+          });
+      }
+
+      // Track mouse for parallax
+      let mouseX = 0;
+      let mouseY = 0;
+      const handleMouse = (e: MouseEvent) => {
+          mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+          mouseY = (e.clientY / window.innerHeight) * 2 - 1;
+      };
+      window.addEventListener('mousemove', handleMouse);
+
+      let animId: number;
+      const render = () => {
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          ctx.clearRect(0, 0, w, h);
+          
+          const time = Date.now() * 0.001;
+
+          orbs.forEach(orb => {
+              // Gentle orbital motion (same as OrbTransition)
+              orb.angle += orb.speed;
+              
+              // Add noise/jitter
+              const noiseMult = 4;
+              const noiseX = Math.sin(time * 1.5 + orb.noiseOffset) * noiseMult;
+              const noiseY = Math.cos(time * 1.5 + orb.noiseOffset) * noiseMult;
+
+              // Mouse parallax
+              const parallaxX = mouseX * orb.depth * -0.5;
+              const parallaxY = mouseY * orb.depth * -0.5;
+
+              // Float around base position
+              const floatX = Math.sin(orb.angle) * 30;
+              const floatY = Math.cos(orb.angle * 0.7) * 20;
+
+              const drawX = orb.baseX + floatX + noiseX + parallaxX;
+              const drawY = orb.baseY + floatY + noiseY + parallaxY;
+
+              // Breathing
+              const breathe = 1 + Math.sin(time * 2 + orb.noiseOffset) * 0.2;
+              const size = orb.size * breathe;
+
+              // Glow - EXACT same as OrbTransition
+              const gradient = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, size * 4);
+              gradient.addColorStop(0, `${orb.color}50`);
+              gradient.addColorStop(0.5, `${orb.color}18`);
+              gradient.addColorStop(1, "transparent");
+              ctx.fillStyle = gradient;
+              ctx.beginPath();
+              ctx.arc(drawX, drawY, size * 4, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Core
+              ctx.fillStyle = orb.color;
+              ctx.globalAlpha = 0.85;
+              ctx.beginPath();
+              ctx.arc(drawX, drawY, size, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Highlight
+              ctx.fillStyle = "#ffffff";
+              ctx.globalAlpha = 0.9;
+              ctx.beginPath();
+              ctx.arc(drawX, drawY, size * 0.3, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.globalAlpha = 1;
+          });
+
+          // Draw connections when nearby (same as OrbTransition)
+          ctx.strokeStyle = "rgba(139, 92, 246, 0.12)";
+          ctx.lineWidth = 0.5;
+
+          for (let i = 0; i < orbs.length; i += 2) {
+            for (let j = i + 1; j < Math.min(i + 6, orbs.length); j++) {
+              const o1 = orbs[i];
+              const o2 = orbs[j];
+              const dx = o1.baseX - o2.baseX;
+              const dy = o1.baseY - o2.baseY;
+              if (dx * dx + dy * dy < 10000) { // 100px squared
+                ctx.globalAlpha = 0.15;
+                ctx.beginPath();
+                ctx.moveTo(o1.baseX, o1.baseY);
+                ctx.lineTo(o2.baseX, o2.baseY);
+                ctx.stroke();
+              }
+            }
+          }
+          ctx.globalAlpha = 1;
+
+          animId = requestAnimationFrame(render);
+      };
+      render();
+
+      return () => {
+          window.removeEventListener('resize', resize);
+          window.removeEventListener('mousemove', handleMouse);
+          cancelAnimationFrame(animId);
+      }
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -106,26 +262,28 @@ export default function Projects() {
   };
 
   return (
-    <div ref={triggerRef} className="overflow-hidden">
+    <div ref={triggerRef} className="relative">
+      {/* Background elements removed for seamless integration */}
+      
       <section
         ref={sectionRef}
         id="projects"
-        className="flex items-center gap-8 px-[10vw] py-20 min-h-screen"
+        className="flex items-center gap-8 px-[10vw] py-20 min-h-screen relative z-10"
         style={{ width: "fit-content" }}
       >
         {/* Section Title */}
         <div className="flex-shrink-0 w-[40vw] pr-20">
-          <h2 className="text-5xl md:text-7xl font-bold mb-6">
+          <h2 className="text-5xl md:text-7xl font-bold mb-6 text-foreground">
             <span className="text-gradient">Featured</span>
             <br />
             Projects
           </h2>
-          <p className="text-lg text-gray-600 max-w-md">
+          <p className="text-lg text-muted max-w-md">
             A selection of projects that showcase our expertise in building
             scalable, user-centric digital solutions.
           </p>
           <div className="mt-8 flex items-center gap-4">
-            <span className="text-sm text-gray-500">Scroll horizontally</span>
+            <span className="text-sm text-muted">Scroll horizontally</span>
             <svg
               className="w-6 h-6 text-[var(--accent)] animate-pulse"
               fill="none"

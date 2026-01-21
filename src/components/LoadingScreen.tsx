@@ -64,16 +64,16 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     
     // Background stars for depth
     const stars: { x: number; y: number; size: number; alpha: number; speed: number; baseAlpha: number; twinkleSpeed: number }[] = [];
-    for(let i=0; i<100; i++) { // 100 faint stars
-         const baseAlpha = Math.random() * 0.3 + 0.05;
+    for(let i=0; i<150; i++) { // Increased count and visibility
+         const baseAlpha = Math.random() * 0.6 + 0.2; // Much brighter: 0.2 to 0.8
          stars.push({
              x: Math.random() * width,
              y: Math.random() * height,
-             size: Math.random() * 1.5,
+             size: Math.random() * 2.0 + 0.5, // Larger: 0.5 to 2.5
              alpha: baseAlpha,
              baseAlpha: baseAlpha,
              speed: Math.random() * 0.2 + 0.05,
-             twinkleSpeed: Math.random() * 0.02 + 0.005
+             twinkleSpeed: Math.random() * 0.03 + 0.005
          });
     }
 

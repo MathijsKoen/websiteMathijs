@@ -50,7 +50,7 @@ export default function ParticleTransition({
   id = "particle-transition",
   height = 150,
   children,
-  backgroundColor = "#ffffff",
+  backgroundColor = "transparent",
 }: ParticleTransitionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -173,6 +173,8 @@ export default function ParticleTransition({
 
     // Clear canvas
     ctx.clearRect(0, 0, rect.width, rect.height);
+    // Double clear to ensure transparency glitches are gone
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Teken centrale glow wanneer particles samenkomen
     const progress = progressRef.current;
@@ -351,17 +353,7 @@ export default function ParticleTransition({
         style={{ zIndex: 1 }}
       />
 
-      {/* Gradient overlays voor smooth edges */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `
-            linear-gradient(to bottom, ${backgroundColor} 0%, transparent 15%),
-            linear-gradient(to top, ${backgroundColor} 0%, transparent 15%)
-          `,
-          zIndex: 2,
-        }}
-      />
+      {/* Gradient overlays removed to prevent color blocking */}
 
       {/* Centraal content gebied */}
       {children && (

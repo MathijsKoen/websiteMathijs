@@ -139,7 +139,17 @@ export default function Hero() {
           className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
           style={{ perspective: "1000px" }}
         >
-          Hi, We&apos;re Novum
+          Hi, We&apos;re <span 
+            className="inline-block drop-shadow-[0_0_35px_rgba(59,130,246,0.5)] animate-gradient"
+            style={{
+              background: "linear-gradient(to right, #22d3ee, #3b82f6, #4f46e5)",
+              backgroundSize: "200% auto",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              color: "transparent"
+            }}
+          >Novum</span>
         </h1>
 
         <p
