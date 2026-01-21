@@ -1,3 +1,4 @@
+import IntroLoader from "@/components/IntroLoader";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -14,6 +15,7 @@ import StickySection from "@/components/StickySection"; // Add this import
 export default function Home() {
   return (
     <>
+      <IntroLoader />
       <Navigation />
       <main>
         <Hero />

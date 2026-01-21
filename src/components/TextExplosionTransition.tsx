@@ -202,8 +202,40 @@ export default function TextExplosionTransition({
         const easeVal = easeOutExpo(moveProgress);
         
         // Linear interpolation from Start to Target
-        p.x = p.startX + (p.targetX - p.startX) * easeVal;
-        p.y = p.startY + (p.targetY - p.startY) * easeVal;
+        const baseX = p.startX + (p.targetX - p.startX) * easeVal;
+        const baseY = p.startY + (p.targetY - p.startY) * easeVal;
+        
+        p.x = baseX;
+        p.y = baseY;
+
+        // Idle animation / "Living" start state
+        // When progress is low, we want the formation to feel alive (breathe, rotate)
+        const idleIntensity = Math.max(0, 1 - moveProgress * 4); // Fade out by 25% progress
+        
+        if (idleIntensity > 0) {
+           const time = Date.now();
+           // Gentle rotation
+           const angle = time * 0.0003;
+           const centerX = width / 2;
+           const centerY = height / 2;
+           
+           const dx = p.startX - centerX;
+           const dy = p.startY - centerY;
+           
+           // Rotate
+           const rotatedX = dx * Math.cos(angle) - dy * Math.sin(angle);
+           const rotatedY = dx * Math.sin(angle) + dy * Math.cos(angle);
+           
+           // Breathe
+           const breathe = 1 + Math.sin(time * 0.0015) * 0.05;
+           
+           const targetIdleX = centerX + rotatedX * breathe;
+           const targetIdleY = centerY + rotatedY * breathe;
+           
+           // Apply drift relative to the static start pos
+           p.x += (targetIdleX - p.startX) * idleIntensity;
+           p.y += (targetIdleY - p.startY) * idleIntensity;
+        }
 
         // Add wobble when they are close to formed/target state
         if (moveProgress > 0.8) {
@@ -274,16 +306,17 @@ export default function TextExplosionTransition({
 
     const trigger = ScrollTrigger.create({
       trigger: container,
-      start: "top bottom", // Start immediately when entering viewport
-      end: "center 30%", // End when centered (with a bit of offset)
-      scrub: 1, // Reduced scrub for more direct "step-by-step" feel
+      start: "top 75%", // Start later (was top bottom)
+      end: "bottom 10%", // End much later (was center 30%) to make the explosion slower/longer
+      scrub: 1.5, // Increased from 1 for smoother, weightier feel
       animation: gsap.fromTo(progressRef, { value: 0 }, { 
         value: 1, 
         ease: "none",
         onUpdate: () => {
           // Sync React state with GSAP tween progress for smoother text
           const p = progressRef.value;
-          const textProgress = Math.max(0, p / 0.6);
+          // Faster text appearance: Complete text animation in first 35% of scroll (was 60%)
+          const textProgress = Math.max(0, p / 0.35);
           const chars = title.split("");
           
           // Only update state if needed to avoid excessive renders, 
