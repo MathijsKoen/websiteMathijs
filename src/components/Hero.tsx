@@ -134,7 +134,7 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto text-center">
         <p className="text-accent font-mono text-sm mb-4 tracking-wider">
-          Crafting Digital Experiences
+          Creating Digital Experiences
         </p>
 
         <h1
@@ -148,9 +148,8 @@ export default function Hero() {
               background: "linear-gradient(to right, #22d3ee, #3b82f6, #4f46e5)",
               backgroundSize: "200% auto",
               WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
               backgroundClip: "text",
-              color: "transparent"
+              WebkitTextFillColor: "transparent",
             }}
           >Novum</span>
         </h1>
