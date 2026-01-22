@@ -18,70 +18,196 @@ export default function ScrollProgressBar() {
   const barRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeSection, setActiveSection] = useState(0);
+  const projectsTriggerRef = useRef<ScrollTrigger | null>(null);
 
   useEffect(() => {
     if (!barRef.current || !containerRef.current) return;
 
-    // Calculate total progress excluding pinned horizontal scroll
-    let totalSections = 5; // hero, about, projects, skills, contact
-    let currentSection = 0;
+    const totalSections = sections.length;
+    const container = containerRef.current;
+    const bar = barRef.current;
 
-    // Update progress bar based on active section (not raw scroll)
-    const updateProgress = (sectionIndex: number) => {
-      currentSection = sectionIndex;
-      const progressPercent = (sectionIndex / (totalSections - 1)) * 100;
-      gsap.to(barRef.current, {
-        height: `${progressPercent}%`,
-        duration: 0.5,
-        ease: "power2.out",
-      });
+    // Functie om de Projects ScrollTrigger te vinden
+    const findProjectsTrigger = () => {
+      const allTriggers = ScrollTrigger.getAll();
+      return allTriggers.find(trigger => {
+        // De Projects trigger heeft pin: true en bevat de #projects sectie
+        if (!trigger.pin) return false;
+        const triggerEl = trigger.trigger as HTMLElement;
+        if (!triggerEl) return false;
+        return triggerEl.querySelector('#projects') !== null;
+      }) || null;
     };
 
     // Show/hide based on scroll position
-    gsap.to(containerRef.current, {
-      opacity: 1,
-      scrollTrigger: {
-        trigger: "body",
-        start: "100px top",
-        toggleActions: "play none none reverse",
-      },
+    const showHideTrigger = ScrollTrigger.create({
+      trigger: "body",
+      start: "100px top",
+      onEnter: () => gsap.to(container, { opacity: 1, duration: 0.3 }),
+      onLeaveBack: () => gsap.to(container, { opacity: 0, duration: 0.3 }),
     });
 
-    // Track active section and update progress
-    sections.forEach((section, index) => {
-      const element = document.getElementById(section.id);
-      if (!element) return;
+    // Bereken de start en eind scroll posities voor elke sectie
+    const calculateSectionRanges = () => {
+      const ranges: { start: number; end: number; id: string }[] = [];
+      
+      // Probeer de Projects trigger te vinden
+      if (!projectsTriggerRef.current) {
+        projectsTriggerRef.current = findProjectsTrigger();
+      }
+      
+      const projectsTrigger = projectsTriggerRef.current;
+      
+      sections.forEach((section, index) => {
+        const element = document.getElementById(section.id);
+        if (!element) return;
 
-      const progressStart = index * 25; // 0, 25, 50, 75
-      const progressEnd = (index + 1) * 25; // 25, 50, 75, 100
-
-      // Use a simpler ScrollTrigger for the progress bar itself
-      ScrollTrigger.create({
-        trigger: element,
-        start: "top top", 
-        // For the projects section (index 2), we want it to span the entire pinned duration
-        end: section.id === "projects" ? "bottom top" : "bottom top", 
-        scrub: true, // Smooth scrubbing
-        onUpdate: (self) => {
-          // self.progress is 0 to 1 based on the section's scroll duration
-          // Map this to the bar segment
-          const currentProgress = progressStart + (self.progress * 25);
+        if (section.id === "projects" && projectsTrigger) {
+          // Voor de gepinde Projects sectie, gebruik de ScrollTrigger start/end
+          ranges.push({
+            id: section.id,
+            start: projectsTrigger.start,
+            end: projectsTrigger.end,
+          });
+        } else {
+          // Voor normale secties, bereken op basis van offsetTop
+          // Maar houd rekening met dat secties na projects verschoven zijn door de pin spacer
+          const rect = element.getBoundingClientRect();
+          const scrollY = window.scrollY;
           
-          // Only update if this section is actually active/scrolling to prevent conflicts?
-          // Actually, since triggers are sequential, this is fine.
-          // However, we want to ensure we don't overwrite if another trigger is more relevant.
-          // BUT - simply setting height here is the most robust way.
-          if (self.isActive || (self.progress > 0 && self.progress < 1)) {
-              gsap.set(barRef.current, { height: `${currentProgress}%` });
+          // Als dit een sectie na projects is en projects een trigger heeft
+          if (projectsTrigger && (section.id === "skills" || section.id === "contact")) {
+            // Deze secties komen na de pin, dus hun echte positie is na de projects scroll range
+            ranges.push({
+              id: section.id,
+              start: scrollY + rect.top,
+              end: scrollY + rect.bottom,
+            });
+          } else {
+            ranges.push({
+              id: section.id,
+              start: element.offsetTop,
+              end: element.offsetTop + element.offsetHeight,
+            });
           }
-        },
-        onEnter: () => setActiveSection(index),
-        onEnterBack: () => setActiveSection(index),
+        }
       });
-    });
+
+      return ranges;
+    };
+
+    // Update functie
+    const updateProgressBar = () => {
+      const scrollY = window.scrollY;
+      const vh = window.innerHeight;
+      
+      // Refresh de trigger referentie indien nodig
+      if (!projectsTriggerRef.current) {
+        projectsTriggerRef.current = findProjectsTrigger();
+      }
+      
+      const projectsTrigger = projectsTriggerRef.current;
+      
+      // Bepaal welke sectie actief is
+      let currentIndex = 0;
+      let sectionProgress = 0;
+
+      // Check eerst of we in de gepinde Projects sectie zijn
+      if (projectsTrigger && projectsTrigger.isActive) {
+        currentIndex = 2; // Projects index
+        sectionProgress = projectsTrigger.progress;
+      } else {
+        // Check de andere secties
+        for (let i = sections.length - 1; i >= 0; i--) {
+          const section = sections[i];
+          const element = document.getElementById(section.id);
+          if (!element) continue;
+
+          const rect = element.getBoundingClientRect();
+          
+          // Voor de laatste sectie (contact), gebruik een speciale detectie
+          if (i === sections.length - 1) {
+            const scrollBottom = scrollY + vh;
+            const docHeight = document.documentElement.scrollHeight;
+            
+            // Contact is actief als we in de buurt van het einde zijn
+            if (scrollBottom >= docHeight - 50 || rect.top <= vh / 2) {
+              currentIndex = i;
+              // Progress: simpele berekening gebaseerd op positie
+              const sectionHeight = rect.height;
+              if (sectionHeight > 0 && rect.top <= vh / 2) {
+                sectionProgress = Math.max(0, Math.min(1, (vh / 2 - rect.top) / sectionHeight));
+              } else if (scrollBottom >= docHeight - 50) {
+                // Als we helemaal onderaan zijn, 100% progress
+                sectionProgress = 1;
+              }
+              break;
+            }
+          }
+          
+          // Sectie is actief als de bovenkant boven 1/3 van de viewport is
+          if (rect.top <= vh / 3) {
+            currentIndex = i;
+            
+            // Bereken progress binnen de sectie
+            if (section.id === "projects" && projectsTrigger) {
+              sectionProgress = projectsTrigger.progress;
+            } else {
+              const sectionHeight = rect.height;
+              if (sectionHeight > 0) {
+                // Progress gebaseerd op hoeveel van de sectie voorbij de top is
+                sectionProgress = Math.max(0, Math.min(1, -rect.top / (sectionHeight - vh)));
+              }
+            }
+            break;
+          }
+        }
+      }
+
+      setActiveSection(currentIndex);
+
+      // Bereken totale progress bar hoogte
+      // Elke sectie krijgt een gelijk deel
+      const sectionWeight = 100 / (totalSections - 1);
+      const baseProgress = currentIndex * sectionWeight;
+      const contribution = sectionProgress * sectionWeight;
+      
+      const totalProgress = Math.min(100, Math.max(0, baseProgress + contribution));
+
+      gsap.to(bar, {
+        height: `${totalProgress}%`,
+        duration: 0.4,
+        ease: "power1.out",
+        overwrite: "auto",
+      });
+    };
+
+    // Initialiseer na een korte delay zodat andere ScrollTriggers klaar zijn
+    const initTimeout = setTimeout(() => {
+      projectsTriggerRef.current = findProjectsTrigger();
+      updateProgressBar();
+    }, 200);
+
+    // Resize handler
+    const handleResize = () => {
+      projectsTriggerRef.current = null; // Reset zodat we opnieuw zoeken
+      setTimeout(() => {
+        projectsTriggerRef.current = findProjectsTrigger();
+        updateProgressBar();
+      }, 100);
+    };
+
+    // Event listeners
+    ScrollTrigger.addEventListener("refresh", updateProgressBar);
+    window.addEventListener("scroll", updateProgressBar, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      clearTimeout(initTimeout);
+      showHideTrigger.kill();
+      ScrollTrigger.removeEventListener("refresh", updateProgressBar);
+      window.removeEventListener("scroll", updateProgressBar);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
