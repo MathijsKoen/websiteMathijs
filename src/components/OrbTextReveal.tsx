@@ -480,7 +480,7 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
       <div
         className={`absolute bottom-14 z-20 text-xs tracking-[0.35em] uppercase font-mono text-muted transition-opacity duration-500 ${showPrompt ? "opacity-70" : "opacity-0"}`}
       >
-        Click to explore
+        Hover to explore
       </div>
     </div>
   );
