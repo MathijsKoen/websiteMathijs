@@ -31,7 +31,7 @@ export default function Vignette() {
         ref={overlayRef}
         className="fixed inset-0 z-[40] pointer-events-none" // z-40 to sit above most content but below modals/nav if needed
         style={{ 
-            background: "radial-gradient(circle at center, transparent 30%, rgba(5,5,5,0.8) 100%)",
+            background: "var(--vignette-overlay)",
             height: "100vh",
             width: "100vw"
         }} 

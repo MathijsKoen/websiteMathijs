@@ -9,6 +9,7 @@
   --muted: #64748b;
   --border: #e2e8f0;
   --surface: #f8fafc;
+  --vignette-overlay: radial-gradient(circle at center, rgba(0,0,0,0) 30%, rgba(5,5,5,0.85) 100%);
 }
 
 @theme inline {

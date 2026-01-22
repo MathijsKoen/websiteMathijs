@@ -373,7 +373,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       
       {/* Cinematic Vignette */}
       <div className="absolute inset-0 z-30 pointer-events-none" 
-           style={{ background: "radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.8) 100%)" }} 
+         style={{ background: "var(--vignette-overlay)" }} 
       />
 
       {/* CLICK PROMPT */}

@@ -117,17 +117,6 @@ export default function Hero() {
       id="hero"
       className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden"
     >
-      {/* Background gradient light */}
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-accent-light/3 to-transparent" />
-      
-      {/* Spotlight effect */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-radial from-accent/20 via-accent/5 to-transparent rounded-full blur-3xl opacity-60" />
-
-      {/* Floating light orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/15 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent-light/20 rounded-full blur-3xl" />
-      <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-accent/10 rounded-full blur-2xl" />
-
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto text-center">
         <p className="text-accent font-mono text-sm mb-4 tracking-wider">

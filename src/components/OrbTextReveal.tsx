@@ -17,93 +17,116 @@ class Particle {
   y: number;
   originX: number;
   originY: number;
-  startX: number;
-  startY: number;
+  width: number;
+  height: number;
+  centerX: number;
+  centerY: number;
+  baseSize: number;
   size: number;
+  hue: number;
   color: string;
-  // New properties for dynamic movement
   angle: number;
-  speed: number;
+  orbitRadius: number;
+  orbitSpeed: number;
   offset: number;
+  depth: number;
   
-  constructor(x: number, y: number, canvasWidth: number, canvasHeight: number) {
+  constructor(x: number, y: number, canvasWidth: number, canvasHeight: number, hue: number) {
     this.originX = x;
     this.originY = y;
+    this.width = canvasWidth;
+    this.height = canvasHeight;
+    this.centerX = canvasWidth / 2;
+    this.centerY = canvasHeight / 2;
     
-    // Start from a more chaotic, explosive distribution
-    const angle = Math.random() * Math.PI * 2;
-    // Reduced scatter distance (was canvasWidth) to keep it calmer and closer
-    const distance = Math.random() * 150 + 50; 
-    this.startX = canvasWidth / 2 + Math.cos(angle) * distance;
-    this.startY = canvasHeight / 2 + Math.sin(angle) * distance;
-    
-    // Initialize current position to start position to fix TypeScript error
-    this.x = this.startX;
-    this.y = this.startY;
+    this.hue = hue;
+    this.color = `hsla(${this.hue}, 90%, 70%, 0.9)`;
 
-    this.size = Math.random() * 2.5 + 1.5;
-    const colors = ["#3b82f6", "#60a5fa", "#93c5fd", "#2563eb", "#ffffff"];
-    this.color = colors[Math.floor(Math.random() * colors.length)];
-    
     this.angle = Math.random() * Math.PI * 2;
-    this.speed = 0.02 + Math.random() * 0.03;
+    const maxDim = Math.max(canvasWidth, canvasHeight);
+    this.orbitRadius = maxDim * (0.18 + Math.random() * 0.25);
+    this.orbitSpeed = (0.08 + Math.random() * 0.18) * (Math.random() > 0.5 ? 1 : -1);
     this.offset = Math.random() * 100;
+    this.depth = 0.3 + Math.random() * 0.4;
+
+    this.baseSize = Math.random() * 1.8 + 1.4;
+    this.size = this.baseSize;
+    this.x = this.centerX;
+    this.y = this.centerY;
   }
 
-  update(mouse: { x: number; y: number; radius: number }, progress: number) {
-    // Basic progression
-    // Add swirl/tangential movement based on remaining distance
-    const dx = this.originX - this.startX;
-    const dy = this.originY - this.startY;
-    
-    // Easing: enhance the entry
-    const t = progress;
-    const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-    
-    // Spiral effect calculation
-    // Particles spiral in towards their target
-    const spiralRadius = (1 - ease) * 200; // Radius shrinks as we get closer
-    // Increased rotation to Math.PI * 3 so the spinning effect lasts "longer"/is more pronounced
-    const spiralAngle = this.angle + (ease * Math.PI * 3); 
-    
-    const spiralX = Math.cos(spiralAngle + this.offset) * spiralRadius;
-    const spiralY = Math.sin(spiralAngle + this.offset) * spiralRadius;
+  update(mouse: { x: number; y: number; radius: number }, progress: number, time: number) {
+    const t = Math.max(0, Math.min(1, progress));
+    const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
-    // Target position interpolation
-    let targetX = this.startX + dx * ease;
-    let targetY = this.startY + dy * ease;
-    
-    // Add spiral offset - removed the < 0.9 check so it spirals all the way in
-    targetX += spiralX;
-    targetY += spiralY;
+    const orbitAngle = this.angle + time * this.orbitSpeed;
+    const orbitX = this.centerX + Math.cos(orbitAngle) * this.orbitRadius;
+    const orbitY = this.centerY + Math.sin(orbitAngle) * this.orbitRadius * 0.7;
 
-    this.x = targetX;
-    this.y = targetY;
+    const drift = (1 - ease) * 6;
+    const driftX = Math.sin(time * 0.7 + this.offset) * drift;
+    const driftY = Math.cos(time * 0.9 + this.offset) * drift;
+
+    let x = orbitX + driftX;
+    let y = orbitY + driftY;
+
+    this.x = x + (this.originX - x) * ease;
+    this.y = y + (this.originY - y) * ease;
+
+    // Subtle parallax
+    const nx = (mouse.x - this.centerX) / this.width;
+    const ny = (mouse.y - this.centerY) / this.height;
+    const parallax = 8 * this.depth * ease;
+    this.x += nx * parallax;
+    this.y += ny * parallax;
 
     // Mouse interaction (repel)
-    const mdx = mouse.x - this.x;
-    const mdy = mouse.y - this.y;
+    const mdx = this.x - mouse.x;
+    const mdy = this.y - mouse.y;
     // Optimization: Use squared distance to avoid expensive sqrt on every frame
     const distSq = mdx * mdx + mdy * mdy;
     const radiusSq = mouse.radius * mouse.radius;
 
-    if (distSq < radiusSq) {
-      const distance = Math.sqrt(distSq);
-      const forceDirectionX = mdx / distance;
-      const forceDirectionY = mdy / distance;
+    if (distSq < radiusSq && ease > 0.5) {
+      const distance = Math.sqrt(distSq) || 1;
       const force = (mouse.radius - distance) / mouse.radius;
-      // Repel force stronger when assembled
-      const strength = 5 * Math.max(0.2, progress); 
-      
-      this.x -= forceDirectionX * force * strength;
-      this.y -= forceDirectionY * force * strength;
+      const strength = 3 * force * ease;
+      this.x += (mdx / distance) * strength;
+      this.y += (mdy / distance) * strength;
     }
+
+    const pulse = 0.85 + Math.sin(time * 1.2 + this.offset) * 0.15;
+    this.size = this.baseSize * (0.7 + ease * 0.8) * pulse;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = this.color;
+  draw(ctx: CanvasRenderingContext2D, time: number, progress: number) {
+    const edgeX = Math.abs(this.x - this.centerX) / (this.width * 0.5);
+    const edgeY = Math.abs(this.y - this.centerY) / (this.height * 0.5);
+    const edge = Math.min(1, Math.max(edgeX, edgeY));
+    const edgeFade = Math.max(0, 1 - Math.pow(edge, 1.7));
+    const alpha = edgeFade * (0.55 + progress * 0.35);
+
+    const glowStrength = (0.06 + progress * 0.12) * edgeFade;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 5);
+    glow.addColorStop(0, `hsla(${this.hue}, 90%, 70%, ${glowStrength})`);
+    glow.addColorStop(0.4, `hsla(${this.hue}, 90%, 70%, ${glowStrength * 0.4})`);
+    glow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size * 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = `hsla(${this.hue}, 90%, 70%, ${alpha})`;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = `rgba(255,255,255,${0.45 * edgeFade})`;
+    ctx.beginPath();
+    ctx.arc(this.x - this.size * 0.2, this.y - this.size * 0.2, this.size * 0.3, 0, Math.PI * 2);
     ctx.fill();
   }
 }
@@ -127,6 +150,8 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
     let particles: Particle[] = [];
     let animationId: number;
     let progress = 0;
+    let width = 0;
+    let height = 0;
     
     const mouse = {
       x: -9999,
@@ -145,40 +170,54 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
     const init = () => {
       // Set canvas size to parent container
       const rect = containerRef.current!.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const fontSize = Math.min(canvas.width / (text.length * 0.7), 120);
+      const fontSize = Math.min(width / (text.length * 0.7), 140);
       
-      ctx.fillStyle = "white";
-      ctx.font = `900 ${fontSize}px "Inter", "system-ui", sans-serif`; 
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      // Offscreen sampling canvas to avoid DPR artifacts
+      const sampleCanvas = document.createElement("canvas");
+      sampleCanvas.width = width;
+      sampleCanvas.height = height;
+      const sampleCtx = sampleCanvas.getContext("2d");
+      if (!sampleCtx) return;
       
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      sampleCtx.fillStyle = "white";
+      sampleCtx.font = `900 ${fontSize}px "Inter", "system-ui", sans-serif`; 
+      sampleCtx.textAlign = "center";
+      sampleCtx.textBaseline = "middle";
+      sampleCtx.fillText(text, width / 2, height / 2);
       
-      const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const textCoordinates = sampleCtx.getImageData(0, 0, width, height);
       
       particles = [];
-      const step = 5; // Density
+      const step = 7; // Density
 
       for (let y = 0, y2 = textCoordinates.height; y < y2; y += step) {
         for (let x = 0, x2 = textCoordinates.width; x < x2; x += step) {
              const alpha = textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3];
           if (alpha > 128) {
-            particles.push(new Particle(x, y, canvas.width, canvas.height));
+            const hue = 210 + (x / Math.max(1, width)) * 70;
+            particles.push(new Particle(x, y, width, height, hue));
           }
         }
       }
+
     };
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const time = Date.now() * 0.001;
+      ctx.clearRect(0, 0, width, height);
+
       for (let i = 0; i < particles.length; i++) {
-        particles[i].update(mouse, progress);
-        particles[i].draw(ctx);
+        particles[i].update(mouse, progress, time);
+        particles[i].draw(ctx, time, progress);
       }
+
       animationId = requestAnimationFrame(animate);
     };
 
@@ -192,18 +231,18 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
       end: "bottom top",   
       scrub: 1, 
       onUpdate: (self) => {
-        // Modified to hold the "assembled" state longer
         const p = self.progress;
-        
-        // Assemble slowly (0 -> 40%) - Delays the "lock"
-        if (p < 0.4) {
-          progress = gsap.utils.interpolate(0, 1, p / 0.4);
+        const easeInOut = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+        // Assemble (0 -> 45%)
+        if (p < 0.45) {
+          progress = easeInOut(p / 0.45);
         } 
-        // Disperse in the last 20%
-        else if (p > 0.8) {
-          progress = gsap.utils.interpolate(1, 0, (p - 0.8) / 0.2);
+        // Disperse in the last 25%
+        else if (p > 0.75) {
+          progress = 1 - easeInOut((p - 0.75) / 0.25);
         } 
-        // Hold assembled in the middle (40% -> 80%)
+        // Hold assembled in the middle (45% -> 75%)
         else {
           progress = 1;
         }
@@ -226,7 +265,11 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
   }, [isMounted, text]);
 
   return (
-    <div ref={containerRef} className={`relative w-full overflow-hidden flex items-center justify-center ${height} ${className}`}>
+    <div
+      ref={containerRef}
+      className={`relative w-full overflow-hidden flex items-center justify-center ${height} ${className}`}
+      style={{ backgroundColor: "var(--background)" }}
+    >
       {/* Background is transparent as requested */}
       <canvas ref={canvasRef} className="absolute inset-0 z-10" />
     </div>
