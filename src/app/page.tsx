@@ -12,6 +12,7 @@ import OrbTransition from "@/components/OrbTransition";
 import EnergyFieldTransition from "@/components/EnergyFieldTransition";
 import StickySection from "@/components/StickySection";
 import GlobalOrbs from "@/components/GlobalOrbs";
+import ScrollProgressBar from "@/components/ScrollProgressBar";
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
       />
       <IntroLoader />
       <Navigation />
+      <ScrollProgressBar />
       <main>
         <Hero />
         

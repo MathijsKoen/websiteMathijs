@@ -30,6 +30,17 @@ class Particle {
   orbitSpeed: number;
   offset: number;
   depth: number;
+  disturbX: number;
+  disturbY: number;
+  disturbVX: number;
+  disturbVY: number;
+  looseTimer: number;
+  looseAngle: number;
+  looseRadius: number;
+  looseVX: number;
+  looseVY: number;
+  lastTime: number;
+  hitCount: number;
   
   constructor(x: number, y: number, canvasWidth: number, canvasHeight: number, hue: number) {
     this.originX = x;
@@ -53,9 +64,29 @@ class Particle {
     this.size = this.baseSize;
     this.x = this.centerX;
     this.y = this.centerY;
+
+    this.disturbX = 0;
+    this.disturbY = 0;
+    this.disturbVX = 0;
+    this.disturbVY = 0;
+
+    this.looseTimer = 0;
+    this.looseAngle = Math.random() * Math.PI * 2;
+    this.looseRadius = 10 + Math.random() * 18;
+    this.looseVX = 0;
+    this.looseVY = 0;
+    this.lastTime = 0;
+    this.hitCount = 0;
   }
 
-  update(mouse: { x: number; y: number; radius: number }, progress: number, time: number) {
+  update(
+    mouse: { x: number; y: number; radius: number },
+    progress: number,
+    time: number,
+    ripples?: { x: number; y: number; strength: number; radius: number }[]
+  ) {
+    const dt = this.lastTime ? Math.min(0.05, time - this.lastTime) : 0.016;
+    this.lastTime = time;
     const t = Math.max(0, Math.min(1, progress));
     const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
@@ -70,19 +101,19 @@ class Particle {
     let x = orbitX + driftX;
     let y = orbitY + driftY;
 
-    this.x = x + (this.originX - x) * ease;
-    this.y = y + (this.originY - y) * ease;
+    const baseX = x + (this.originX - x) * ease;
+    const baseY = y + (this.originY - y) * ease;
 
     // Subtle parallax
     const nx = (mouse.x - this.centerX) / this.width;
     const ny = (mouse.y - this.centerY) / this.height;
     const parallax = 8 * this.depth * ease;
-    this.x += nx * parallax;
-    this.y += ny * parallax;
+    const parallaxX = nx * parallax;
+    const parallaxY = ny * parallax;
 
     // Mouse interaction (repel)
-    const mdx = this.x - mouse.x;
-    const mdy = this.y - mouse.y;
+    const mdx = baseX + parallaxX - mouse.x;
+    const mdy = baseY + parallaxY - mouse.y;
     // Optimization: Use squared distance to avoid expensive sqrt on every frame
     const distSq = mdx * mdx + mdy * mdy;
     const radiusSq = mouse.radius * mouse.radius;
@@ -91,8 +122,115 @@ class Particle {
       const distance = Math.sqrt(distSq) || 1;
       const force = (mouse.radius - distance) / mouse.radius;
       const strength = 3 * force * ease;
-      this.x += (mdx / distance) * strength;
-      this.y += (mdy / distance) * strength;
+      this.disturbVX += (mdx / distance) * strength * 0.6;
+      this.disturbVY += (mdy / distance) * strength * 0.6;
+    }
+
+    // Ripple disturbance (impulse + spring back)
+    if (ripples && ease > 0.4) {
+      ripples.forEach((ripple) => {
+        const rdx = baseX + parallaxX - ripple.x;
+        const rdy = baseY + parallaxY - ripple.y;
+        const rDist = Math.sqrt(rdx * rdx + rdy * rdy) || 1;
+        const band = Math.abs(rDist - ripple.radius);
+        if (band < 80) {
+          const impulse = (1 - band / 80) * ripple.strength * 2.4 * ease;
+          this.disturbVX += (rdx / rDist) * impulse;
+          this.disturbVY += (rdy / rDist) * impulse;
+
+          // Detach and float when hit
+          if (this.hitCount < 1) {
+            // First hit - tiny vibration
+            this.hitCount++;
+            this.looseTimer = 1.8;
+            this.looseVX += (rdx / rDist) * impulse * 0.08;
+            this.looseVY += (rdy / rDist) * impulse * 0.08;
+          } else if (this.hitCount < 2) {
+            // Second hit - gentle nudge
+            this.hitCount++;
+            this.looseTimer = 2.2;
+            this.looseVX += (rdx / rDist) * impulse * 0.15;
+            this.looseVY += (rdy / rDist) * impulse * 0.15;
+          } else if (this.hitCount < 3) {
+            // Third hit - starting to feel it
+            this.hitCount++;
+            this.looseTimer = 3.0;
+            this.looseVX += (rdx / rDist) * impulse * 0.35;
+            this.looseVY += (rdy / rDist) * impulse * 0.35;
+          } else if (this.hitCount < 4) {
+            // Fourth hit - visible disruption
+            this.hitCount++;
+            this.looseTimer = 4.5;
+            this.looseVX += (rdx / rDist) * impulse * 0.8;
+            this.looseVY += (rdy / rDist) * impulse * 0.8;
+          } else if (this.hitCount < 6) {
+            // Fifth/sixth hit - moderate chaos
+            this.hitCount++;
+            this.looseTimer = 7.0;
+            this.looseVX += (rdx / rDist) * impulse * 2.0;
+            this.looseVY += (rdy / rDist) * impulse * 2.0;
+            this.looseRadius += 5;
+          } else {
+            // Many hits - complete destruction
+            this.hitCount++;
+            this.looseTimer = 12.0;
+            this.looseVX += (rdx / rDist) * impulse * 5.0;
+            this.looseVY += (rdy / rDist) * impulse * 5.0;
+            this.looseRadius += 18;
+          }
+        }
+      });
+    }
+
+    // Spring back to base position
+    const spring = 0.12;
+    const damping = 0.86;
+    this.disturbVX += -this.disturbX * spring;
+    this.disturbVY += -this.disturbY * spring;
+    this.disturbVX *= damping;
+    this.disturbVY *= damping;
+    this.disturbX += this.disturbVX;
+    this.disturbY += this.disturbVY;
+
+    // Loose float motion when hit
+    const inFocus = ease > 0.85; // More lenient focus range
+    
+    // Reset hit count when fully leaving focus (even if looseTimer is 0)
+    if (ease < 0.5 && this.hitCount > 0) {
+      this.hitCount = 0;
+      this.looseTimer = 0;
+      this.looseVX = 0;
+      this.looseVY = 0;
+      this.looseRadius = 10 + Math.random() * 18;
+    }
+    
+    if (this.looseTimer > 0) {
+      // While in focus, keep the broken state; allow decay when leaving focus
+      if (!inFocus) {
+        this.looseTimer = Math.max(0, this.looseTimer - dt * 4);
+      }
+      this.looseAngle += dt * (0.8 + this.depth * 0.4);
+      const wobble = Math.sin(time * 1.4 + this.offset) * 0.6;
+      const looseRadius = this.looseRadius + wobble * 6;
+      this.looseVX *= inFocus ? 0.988 : 0.90;
+      this.looseVY *= inFocus ? 0.988 : 0.90;
+
+      const looseX = this.originX + Math.cos(this.looseAngle) * looseRadius + this.looseVX;
+      const looseY = this.originY + Math.sin(this.looseAngle) * looseRadius + this.looseVY;
+      const looseMix = Math.min(1, this.looseTimer / 0.4);
+      
+      // Full loose movement - more chaos with more hits
+      const chaosThreshold = Math.max(0.3, 0.7 - this.hitCount * 0.15);
+      if (inFocus && looseMix > chaosThreshold) {
+        this.x = looseX;
+        this.y = looseY;
+      } else {
+        this.x = baseX + parallaxX + this.disturbX + (looseX - baseX) * looseMix;
+        this.y = baseY + parallaxY + this.disturbY + (looseY - baseY) * looseMix;
+      }
+    } else {
+      this.x = baseX + parallaxX + this.disturbX;
+      this.y = baseY + parallaxY + this.disturbY;
     }
 
     const pulse = 0.85 + Math.sin(time * 1.2 + this.offset) * 0.15;
@@ -135,6 +273,11 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const inFocusRef = useRef(false);
+  const clickPulseRef = useRef(0);
+  const rippleRef = useRef<{ x: number; y: number; radius: number; strength: number }[]>([]);
+  const clickCountRef = useRef(0);
 
   useEffect(() => {
     setIsMounted(true);
@@ -213,10 +356,51 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
       const time = Date.now() * 0.001;
       ctx.clearRect(0, 0, width, height);
 
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update(mouse, progress, time);
-        particles[i].draw(ctx, time, progress);
+      // Decay click pulse
+      if (clickPulseRef.current > 0) {
+        clickPulseRef.current = Math.max(0, clickPulseRef.current - 0.03);
       }
+
+      // Advance ripples
+      rippleRef.current = rippleRef.current
+        .map((r) => ({
+          ...r,
+          radius: r.radius + 18,
+          strength: Math.max(0, r.strength - 0.03),
+        }))
+        .filter((r) => r.strength > 0.02);
+
+      const activeRipples = rippleRef.current;
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update(mouse, progress, time, activeRipples);
+        particles[i].draw(ctx, time, progress + clickPulseRef.current * 0.4);
+      }
+
+      // Render ripples - minimal and professional
+      rippleRef.current.forEach((r) => {
+        const ringAlpha = r.strength * 0.18;
+        const ringWidth = 0.8;
+
+        ctx.save();
+        ctx.strokeStyle = `rgba(59,130,246,${ringAlpha})`;
+        ctx.lineWidth = ringWidth;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Subtle inner glow
+        const innerRadius = Math.max(0, r.radius - 20);
+        const innerGlow = ctx.createRadialGradient(r.x, r.y, innerRadius, r.x, r.y, r.radius + 20);
+        innerGlow.addColorStop(0, "rgba(0,0,0,0)");
+        innerGlow.addColorStop(0.5, `rgba(59,130,246,${ringAlpha * 0.15})`);
+        innerGlow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = innerGlow;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, r.radius + 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
 
       animationId = requestAnimationFrame(animate);
     };
@@ -246,6 +430,15 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
         else {
           progress = 1;
         }
+
+        const isInFocus = p >= 0.45 && p <= 0.75;
+        if (inFocusRef.current !== isInFocus) {
+          inFocusRef.current = isInFocus;
+          setShowPrompt(isInFocus);
+          if (!isInFocus) {
+            clickCountRef.current = 0;
+          }
+        }
       },
       // markers: true
     });
@@ -264,14 +457,31 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
     };
   }, [isMounted, text]);
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!inFocusRef.current) return;
+    clickCountRef.current++;
+    clickPulseRef.current = 1;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    rippleRef.current = [{ x, y, radius: 0, strength: 1 }];
+  };
+
   return (
     <div
       ref={containerRef}
       className={`relative w-full overflow-hidden flex items-center justify-center ${height} ${className}`}
       style={{ backgroundColor: "var(--background)" }}
+      onClick={handleClick}
     >
       {/* Background is transparent as requested */}
       <canvas ref={canvasRef} className="absolute inset-0 z-10" />
+
+      <div
+        className={`absolute bottom-14 z-20 text-xs tracking-[0.35em] uppercase font-mono text-muted transition-opacity duration-500 ${showPrompt ? "opacity-70" : "opacity-0"}`}
+      >
+        Click to explore
+      </div>
     </div>
   );
 }

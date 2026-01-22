@@ -29,22 +29,28 @@ export default function Hero() {
         text.split("").forEach((char, i) => {
           const span = document.createElement("span");
           span.className = "split-char inline-block";
-          span.style.opacity = "0";
-          span.style.transform = "translateY(100px) rotateX(-90deg)";
           span.innerText = char === " " ? "\u00A0" : char;
           title.appendChild(span);
         });
 
         // Animate title characters
-        gsap.to(".split-char", {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          duration: 1,
-          stagger: 0.03,
-          ease: "power4.out",
-          delay: 0.3,
-        });
+        gsap.fromTo(
+          title.querySelectorAll(".split-char"),
+          {
+            opacity: 0,
+            y: 100,
+            rotateX: -90,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            duration: 1,
+            stagger: 0.03,
+            ease: "power4.out",
+            delay: 0.3,
+          }
+        );
       }
 
       // Animate subtitle
@@ -91,6 +97,9 @@ export default function Hero() {
           start: "top top",
           end: "bottom top",
           scrub: 1,
+          onEnterBack: () => {
+            gsap.to(titleRef.current, { opacity: 1, duration: 0.3 });
+          },
         },
         y: 200,
         opacity: 0,
@@ -102,6 +111,11 @@ export default function Hero() {
           start: "top top",
           end: "bottom top",
           scrub: 1,
+          onEnterBack: () => {
+            gsap.to(subtitleRef.current, { opacity: 1, duration: 0.3 });
+            gsap.to(ctaRef.current, { opacity: 1, duration: 0.3 });
+            gsap.to(scrollIndicatorRef.current, { opacity: 1, duration: 0.3 });
+          },
         },
         y: 150,
         opacity: 0,

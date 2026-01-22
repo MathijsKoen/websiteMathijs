@@ -18,6 +18,7 @@ export default function Navigation() {
   const navRef = useRef<HTMLElement>(null);
   const [activeSection, setActiveSection] = useState("hero");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [shouldHide, setShouldHide] = useState(false);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -35,6 +36,12 @@ export default function Navigation() {
         ease: "power3.out",
       }
     );
+
+    // Hide navigation when progress bar appears
+    const handleScroll = () => {
+      setShouldHide(window.scrollY > 120);
+    };
+    window.addEventListener("scroll", handleScroll);
 
     // Change nav background on scroll
     ScrollTrigger.create({
@@ -61,6 +68,7 @@ export default function Navigation() {
     });
 
     return () => {
+      window.removeEventListener("scroll", handleScroll);
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, []);
@@ -80,8 +88,10 @@ export default function Navigation() {
   return (
     <nav
       ref={navRef}
-      className="fixed top-0 left-0 right-0 z-50 px-6 py-4 transition-all duration-300"
-      style={{ opacity: 0 }}
+      className={`fixed top-0 left-0 right-0 z-50 px-6 py-4 transition-all duration-500 ${
+        shouldHide ? "opacity-0 -translate-y-full pointer-events-none" : ""
+      }`}
+      style={{ opacity: shouldHide ? 0 : undefined }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
