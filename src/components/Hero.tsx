@@ -143,21 +143,21 @@ export default function Hero() {
           style={{ perspective: "1000px" }}
         >
           Hi, We&apos;re <span 
-            className="inline-block drop-shadow-[0_0_35px_rgba(59,130,246,0.5)] animate-gradient"
+            className="inline-block animate-gradient"
             style={{
-              background: "linear-gradient(to right, #22d3ee, #3b82f6, #4f46e5)",
+              backgroundImage: "linear-gradient(to right, #22d3ee, #3b82f6, #4f46e5)",
               backgroundSize: "200% auto",
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              color: "transparent",
+              filter: "drop-shadow(0 0 35px rgba(59,130,246,0.5))",
             }}
           >Novum</span>
         </h1>
 
         <p
           ref={subtitleRef}
-          className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-12"
-          style={{ opacity: 0 }}
+          className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12"
         >
           We craft exceptional digital experiences through clean code and
           creative problem-solving. Specialized in building modern web
