@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, ReactNode } from "react";
+import { useRef, useEffect, ReactNode, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -15,8 +15,21 @@ interface StickySectionProps {
 export default function StickySection({ children, className = "", pinDistance = 400 }: StickySectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => window.innerWidth < 768;
+    setIsMobile(checkMobile());
+    
+    const handleResize = () => setIsMobile(checkMobile());
+    window.addEventListener('resize', handleResize);
+    
+    // On mobile, skip all sticky/zoom animations
+    if (checkMobile()) {
+      return () => window.removeEventListener('resize', handleResize);
+    }
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -29,14 +42,11 @@ export default function StickySection({ children, className = "", pinDistance = 
         },
       });
 
-      // Content "Focus" effects
+      // Content "Focus" effects - only on desktop
       if (contentRef.current) {
-        // Create a sequence: Enter -> Hold -> Exit
-        // Removed blur filter for performance optimization
-        
         // 1. Fade In / Focus (15% of scroll)
         tl.fromTo(contentRef.current,
-          { scale: 0.9, opacity: 0.6 },
+          { scale: 0.95, opacity: 0.8 },
           { 
             scale: 1, 
             opacity: 1, 
@@ -55,8 +65,8 @@ export default function StickySection({ children, className = "", pinDistance = 
         // 3. Fade Out / Defocus (15% of scroll)
         .to(contentRef.current,
           { 
-            scale: 0.9, 
-            opacity: 0.6, 
+            scale: 0.95, 
+            opacity: 0.8, 
             duration: 0.15,
             ease: "power2.in"
           },
@@ -66,12 +76,15 @@ export default function StickySection({ children, className = "", pinDistance = 
 
     }, containerRef);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      window.removeEventListener('resize', handleResize);
+    };
   }, [pinDistance]);
 
   return (
     <div ref={containerRef} className={`relative flex items-center justify-center ${className}`}>
-      <div ref={contentRef} className="w-full h-full transition-transform">
+      <div ref={contentRef} className="w-full h-full">
         {children}
       </div>
     </div>

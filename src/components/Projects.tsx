@@ -192,6 +192,10 @@ export default function Projects() {
     const trigger = triggerRef.current;
     if (!section || !trigger) return;
 
+    // Disable horizontal scroll effect on mobile - use vertical scroll instead
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return;
+
     const scrollWidth = section.scrollWidth - window.innerWidth;
 
     const tween = gsap.to(section, {
@@ -231,6 +235,10 @@ export default function Projects() {
   };
 
   const getCardTransform = (cardId: number) => {
+    // Disable 3D effects on mobile
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return "none";
+    }
     if (activeCard !== cardId) {
       return "perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)";
     }
@@ -252,8 +260,7 @@ export default function Projects() {
       <section
         ref={sectionRef}
         id="projects"
-        className="flex flex-col md:flex-row items-center gap-6 md:gap-8 px-4 md:px-[10vw] py-12 md:py-20 min-h-screen relative z-10"
-        style={{ width: "fit-content" }}
+        className="flex flex-col items-center gap-6 px-4 py-12 relative z-10 md:flex-row md:gap-8 md:px-[10vw] md:py-20 md:min-h-screen"
       >
         {/* Section Title */}
         <div className="flex-shrink-0 w-full md:w-[40vw] pr-4 md:pr-20 mb-8 md:mb-0">

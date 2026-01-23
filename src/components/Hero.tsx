@@ -17,11 +17,13 @@ export default function Hero() {
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
+    
+    const isMobile = window.innerWidth < 768;
 
     if (prefersReducedMotion) return;
 
     const ctx = gsap.context(() => {
-      // Split title text into characters
+      // Split title text into characters - simplified on mobile
       const title = titleRef.current;
       if (title) {
         const text = title.innerText;
@@ -33,20 +35,20 @@ export default function Hero() {
           title.appendChild(span);
         });
 
-        // Animate title characters
+        // Animate title characters - reduced movement on mobile
         gsap.fromTo(
           title.querySelectorAll(".split-char"),
           {
             opacity: 0,
-            y: 100,
-            rotateX: -90,
+            y: isMobile ? 30 : 100,
+            rotateX: isMobile ? 0 : -90,
           },
           {
             opacity: 1,
             y: 0,
             rotateX: 0,
-            duration: 1,
-            stagger: 0.03,
+            duration: isMobile ? 0.6 : 1,
+            stagger: isMobile ? 0.02 : 0.03,
             ease: "power4.out",
             delay: 0.3,
           }
@@ -90,36 +92,38 @@ export default function Hero() {
         }
       );
 
-      // Parallax effect on scroll
-      gsap.to(titleRef.current, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-          onEnterBack: () => {
-            gsap.to(titleRef.current, { opacity: 1, duration: 0.3 });
+      // Parallax effect on scroll - disabled on mobile for better performance
+      if (!isMobile) {
+        gsap.to(titleRef.current, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: 1,
+            onEnterBack: () => {
+              gsap.to(titleRef.current, { opacity: 1, duration: 0.3 });
+            },
           },
-        },
-        y: 200,
-        opacity: 0,
-      });
+          y: 200,
+          opacity: 0,
+        });
 
-      gsap.to(subtitleRef.current, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-          onEnterBack: () => {
-            gsap.to(subtitleRef.current, { opacity: 1, duration: 0.3 });
-            gsap.to(ctaRef.current, { opacity: 1, duration: 0.3 });
-            gsap.to(scrollIndicatorRef.current, { opacity: 1, duration: 0.3 });
+        gsap.to(subtitleRef.current, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: 1,
+            onEnterBack: () => {
+              gsap.to(subtitleRef.current, { opacity: 1, duration: 0.3 });
+              gsap.to(ctaRef.current, { opacity: 1, duration: 0.3 });
+              gsap.to(scrollIndicatorRef.current, { opacity: 1, duration: 0.3 });
+            },
           },
-        },
-        y: 150,
-        opacity: 0,
-      });
+          y: 150,
+          opacity: 0,
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -155,14 +159,7 @@ export default function Hero() {
           >Novum</span>
         </h1>
 
-        <p
-          ref={subtitleRef}
-          className="text-base md:text-lg lg:text-xl text-gray-400 max-w-2xl mx-auto mb-12 px-4"
-        >
-          Wij creëren uitzonderlijke digitale ervaringen door middel van clean code en
-          creatieve probleemoplossing. Gespecialiseerd in het bouwen van moderne web
-          applicaties waar gebruikers van houden.
-        </p>
+       
 
         <div
           ref={ctaRef}

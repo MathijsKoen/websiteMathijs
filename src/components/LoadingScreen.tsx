@@ -13,25 +13,35 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   const explodeRef = useRef({ value: 0 }); // 0 -> 1 during explosion
   const mouseRef = useRef({ x: 0, y: 0 }); // Track mouse for parallax
   const [isReady, setIsReady] = useState(false); // Waiting for click
+  const [isMobile, setIsMobile] = useState(false);
   
   // Create a separate timeline for the explosion
   const explosionTl = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
+    // Detect mobile
+    const checkMobile = () => window.innerWidth < 768;
+    setIsMobile(checkMobile());
+    
     // ---- CANVAS SETUP ----
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let width = (canvas.width = window.innerWidth * window.devicePixelRatio);
-    let height = (canvas.height = window.innerHeight * window.devicePixelRatio);
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    const mobile = checkMobile();
+    const pixelRatio = mobile ? 1 : window.devicePixelRatio; // Lower resolution on mobile
+    
+    let width = (canvas.width = window.innerWidth * pixelRatio);
+    let height = (canvas.height = window.innerHeight * pixelRatio);
+    ctx.scale(pixelRatio, pixelRatio);
 
     const handleResize = () => {
-        width = canvas.width = window.innerWidth * window.devicePixelRatio;
-        height = canvas.height = window.innerHeight * window.devicePixelRatio;
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        const mobile = window.innerWidth < 768;
+        const pixelRatio = mobile ? 1 : window.devicePixelRatio;
+        width = canvas.width = window.innerWidth * pixelRatio;
+        height = canvas.height = window.innerHeight * pixelRatio;
+        ctx.scale(pixelRatio, pixelRatio);
         initParticles(); 
     };
     window.addEventListener("resize", handleResize);
@@ -64,12 +74,13 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     
     // Background stars for depth
     const stars: { x: number; y: number; size: number; alpha: number; speed: number; baseAlpha: number; twinkleSpeed: number }[] = [];
-    for(let i=0; i<150; i++) { // Increased count and visibility
-         const baseAlpha = Math.random() * 0.6 + 0.2; // Much brighter: 0.2 to 0.8
+    const starCount = mobile ? 50 : 150; // Reduced count on mobile
+    for(let i=0; i<starCount; i++) {
+         const baseAlpha = Math.random() * 0.6 + 0.2;
          stars.push({
              x: Math.random() * width,
              y: Math.random() * height,
-             size: Math.random() * 2.0 + 0.5, // Larger: 0.5 to 2.5
+             size: Math.random() * (mobile ? 1.5 : 2.0) + 0.5,
              alpha: baseAlpha,
              baseAlpha: baseAlpha,
              speed: Math.random() * 0.2 + 0.05,
@@ -97,7 +108,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         if (!offCtx) return;
 
         // Draw "NOVUM"
-        const fontSize = Math.min(w * 0.18, 200);
+        const fontSize = mobile ? Math.min(w * 0.15, 80) : Math.min(w * 0.18, 200);
         offCtx.font = `900 ${fontSize}px "Geist", "Inter", "Segoe UI", sans-serif`;
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
@@ -107,15 +118,15 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         // Sample Pixels
         const imageData = offCtx.getImageData(0, 0, w, h);
         const data = imageData.data;
-        // INCREASED DENSITY (More orbs than before, but still distinct)
-        // Step size reduced to allow more particles
-        const step = Math.floor(Math.max(10, w / 150)); 
+        // Larger step size on mobile for fewer particles
+        const step = mobile ? Math.floor(Math.max(14, w / 80)) : Math.floor(Math.max(10, w / 150)); 
 
         for(let y = 0; y < h; y += step) {
             for(let x = 0; x < w; x += step) {
                 const alpha = data[(y * w + x) * 4 + 3];
-                // Random check to drop some particles for organic look (20% drop rate)
-                if (alpha > 128 && Math.random() > 0.2) {
+                // Higher drop rate on mobile for fewer particles
+                const dropRate = mobile ? 0.4 : 0.2;
+                if (alpha > 128 && Math.random() > dropRate) {
                      // Found a pixel inside the text
                      // Start position: Randomly scattered OUTSIDE the center or just full screen
                      const angle = Math.random() * Math.PI * 2;
