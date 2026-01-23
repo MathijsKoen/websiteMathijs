@@ -26,11 +26,13 @@ export default function OrbTransition({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const stableColors = useMemo(() => colors, [colors.join(",")]);
 
   useEffect(() => {
     setMounted(true);
+    setIsMobile(window.innerWidth < 768);
   }, []);
 
   useEffect(() => {
@@ -294,6 +296,22 @@ export default function OrbTransition({
       trigger.kill();
     };
   }, [mounted, title, stableColors]);
+
+  // Simple mobile version
+  if (isMobile) {
+    return (
+      <div id={id} className="relative py-16 flex flex-col items-center justify-center">
+        <h2 className="text-4xl md:text-5xl font-black tracking-tight text-gradient text-center">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="mt-4 text-base text-muted max-w-md text-center px-4">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div

@@ -273,6 +273,7 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
   const inFocusRef = useRef(false);
   const clickPulseRef = useRef(0);
@@ -281,7 +282,19 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
 
   useEffect(() => {
     setIsMounted(true);
+    setIsMobile(window.innerWidth < 768);
   }, []);
+
+  // Simple mobile version
+  if (isMobile && isMounted) {
+    return (
+      <div className={`relative w-full flex items-center justify-center py-16 ${className}`}>
+        <h2 className="text-4xl font-black tracking-tight text-gradient text-center">
+          {text}
+        </h2>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (!isMounted || !canvasRef.current || !containerRef.current) return;

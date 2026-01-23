@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -58,6 +58,11 @@ export default function ParticleTransition({
   const progressRef = useRef(0);
   const animationFrameRef = useRef<number>(0);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
   // Easing functie voor smooth beweging
   const easeOutExpo = (t: number): number => {
@@ -335,6 +340,23 @@ export default function ParticleTransition({
       cancelAnimationFrame(animationFrameRef.current);
     };
   }, [initParticles, animate]);
+
+  // Simple mobile version without canvas
+  if (isMobile) {
+    return (
+      <section
+        id={id}
+        className="relative overflow-hidden py-16"
+        style={{ backgroundColor }}
+      >
+        {children && (
+          <div className="relative z-10 flex items-center justify-center px-6">
+            {children}
+          </div>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section

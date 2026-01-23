@@ -21,24 +21,63 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   useEffect(() => {
     // Detect mobile
     const checkMobile = () => window.innerWidth < 768;
-    setIsMobile(checkMobile());
+    const mobile = checkMobile();
+    setIsMobile(mobile);
     
-    // ---- CANVAS SETUP ----
+    // For mobile: simple animation without canvas particles
+    if (mobile) {
+      // Set initial state
+      gsap.set(topShutterRef.current, { yPercent: 0 });
+      gsap.set(bottomShutterRef.current, { yPercent: 0 });
+      
+      // Simple fade in after short delay
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 800);
+      
+      // Setup explosion timeline for mobile
+      explosionTl.current = gsap.timeline({
+        paused: true,
+        onComplete: () => onComplete()
+      });
+      
+      explosionTl.current.to(topShutterRef.current, {
+        yPercent: -100,
+        duration: 0.8,
+        ease: "power3.inOut",
+      });
+      
+      explosionTl.current.to(bottomShutterRef.current, {
+        yPercent: 100,
+        duration: 0.8,
+        ease: "power3.inOut",
+      }, "<");
+      
+      explosionTl.current.to(containerRef.current, {
+        display: "none",
+        duration: 0
+      });
+      
+      return () => {
+        clearTimeout(timer);
+        if (explosionTl.current) explosionTl.current.kill();
+      };
+    }
+    
+    // ---- DESKTOP: CANVAS SETUP ----
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const mobile = checkMobile();
-    const pixelRatio = mobile ? 1 : window.devicePixelRatio; // Lower resolution on mobile
+    const pixelRatio = window.devicePixelRatio;
     
     let width = (canvas.width = window.innerWidth * pixelRatio);
     let height = (canvas.height = window.innerHeight * pixelRatio);
     ctx.scale(pixelRatio, pixelRatio);
 
     const handleResize = () => {
-        const mobile = window.innerWidth < 768;
-        const pixelRatio = mobile ? 1 : window.devicePixelRatio;
+        const pixelRatio = window.devicePixelRatio;
         width = canvas.width = window.innerWidth * pixelRatio;
         height = canvas.height = window.innerHeight * pixelRatio;
         ctx.scale(pixelRatio, pixelRatio);
@@ -74,13 +113,13 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     
     // Background stars for depth
     const stars: { x: number; y: number; size: number; alpha: number; speed: number; baseAlpha: number; twinkleSpeed: number }[] = [];
-    const starCount = mobile ? 50 : 150; // Reduced count on mobile
+    const starCount = 150;
     for(let i=0; i<starCount; i++) {
          const baseAlpha = Math.random() * 0.6 + 0.2;
          stars.push({
              x: Math.random() * width,
              y: Math.random() * height,
-             size: Math.random() * (mobile ? 1.5 : 2.0) + 0.5,
+             size: Math.random() * 2.0 + 0.5,
              alpha: baseAlpha,
              baseAlpha: baseAlpha,
              speed: Math.random() * 0.2 + 0.05,
@@ -108,7 +147,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         if (!offCtx) return;
 
         // Draw "NOVUM"
-        const fontSize = mobile ? Math.min(w * 0.15, 80) : Math.min(w * 0.18, 200);
+        const fontSize = Math.min(w * 0.18, 200);
         offCtx.font = `900 ${fontSize}px "Geist", "Inter", "Segoe UI", sans-serif`;
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
@@ -118,14 +157,14 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         // Sample Pixels
         const imageData = offCtx.getImageData(0, 0, w, h);
         const data = imageData.data;
-        // Larger step size on mobile for fewer particles
-        const step = mobile ? Math.floor(Math.max(14, w / 80)) : Math.floor(Math.max(10, w / 150)); 
+        // Step size for particle density
+        const step = Math.floor(Math.max(10, w / 150)); 
 
         for(let y = 0; y < h; y += step) {
             for(let x = 0; x < w; x += step) {
                 const alpha = data[(y * w + x) * 4 + 3];
-                // Higher drop rate on mobile for fewer particles
-                const dropRate = mobile ? 0.4 : 0.2;
+                // Drop rate for organic look
+                const dropRate = 0.2;
                 if (alpha > 128 && Math.random() > dropRate) {
                      // Found a pixel inside the text
                      // Start position: Randomly scattered OUTSIDE the center or just full screen
@@ -371,6 +410,50 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       explosionTl.current?.play();
   };
 
+  // Simple mobile loading screen
+  if (isMobile) {
+    return (
+      <div 
+        ref={containerRef}
+        onClick={handleCreate}
+        className="fixed inset-0 z-[9999] flex flex-col justify-center items-center cursor-pointer bg-[#050505]"
+      >
+        {/* Simple NOVUM text for mobile */}
+        <h1 
+          className="text-5xl font-black text-white tracking-wider"
+          style={{
+            opacity: isReady ? 1 : 0,
+            transform: isReady ? 'scale(1)' : 'scale(0.8)',
+            transition: 'all 0.8s ease-out'
+          }}
+        >
+          <span className="text-gradient">NOVUM</span>
+        </h1>
+
+        {/* CLICK PROMPT */}
+        <div 
+          className={`absolute bottom-20 z-50 transition-opacity duration-1000 ${isReady ? "opacity-100" : "opacity-0"} pointer-events-none`}
+        >
+          <p className="text-white/60 text-xs tracking-[0.3em] uppercase font-mono animate-pulse">
+            [ Tik om door te gaan ]
+          </p>
+        </div>
+
+        {/* TOP SHUTTER */}
+        <div 
+          ref={topShutterRef}
+          className="absolute top-0 left-0 w-full h-[50vh] bg-[#050505] z-20"
+        />
+
+        {/* BOTTOM SHUTTER */}
+        <div 
+          ref={bottomShutterRef}
+          className="absolute bottom-0 left-0 w-full h-[50vh] bg-[#050505] z-20"
+        />
+      </div>
+    );
+  }
+
   return (
     <div 
         ref={containerRef}
@@ -379,7 +462,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     >
       <canvas 
         ref={canvasRef} 
-        className="absolute inset-0 z-40  mix-blend-screen" 
+        className="absolute inset-0 z-40 mix-blend-screen" 
       />
       
       {/* Cinematic Vignette */}
@@ -412,7 +495,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       <div className="absolute z-50 w-[300px] h-[1px] overflow-visible">
          <div 
             ref={barRef} 
-            className="w-full h-full bg-accent origin-center" // Center origin for explosion feel
+            className="w-full h-full bg-accent origin-center"
             style={{ transform: "scaleX(0)", opacity: 0 }}
          />
       </div>

@@ -25,7 +25,7 @@ export default function StickySection({ children, className = "", pinDistance = 
     const handleResize = () => setIsMobile(checkMobile());
     window.addEventListener('resize', handleResize);
     
-    // On mobile, skip all sticky/zoom animations
+    // On mobile, skip all sticky/zoom animations - just render children normally
     if (checkMobile()) {
       return () => window.removeEventListener('resize', handleResize);
     }
@@ -42,11 +42,10 @@ export default function StickySection({ children, className = "", pinDistance = 
         },
       });
 
-      // Content "Focus" effects - only on desktop
+      // Content "Focus" effects - only on desktop with subtle scale
       if (contentRef.current) {
-        // 1. Fade In / Focus (15% of scroll)
         tl.fromTo(contentRef.current,
-          { scale: 0.95, opacity: 0.8 },
+          { scale: 0.98, opacity: 0.9 },
           { 
             scale: 1, 
             opacity: 1, 
@@ -55,18 +54,16 @@ export default function StickySection({ children, className = "", pinDistance = 
           },
           0
         )
-        // 2. Hold Focus (70% of scroll)
         .to(contentRef.current, {
             scale: 1,
             opacity: 1,
             duration: 0.7,
             ease: "none"
         }, ">")
-        // 3. Fade Out / Defocus (15% of scroll)
         .to(contentRef.current,
           { 
-            scale: 0.95, 
-            opacity: 0.8, 
+            scale: 0.98, 
+            opacity: 0.9, 
             duration: 0.15,
             ease: "power2.in"
           },
@@ -81,6 +78,11 @@ export default function StickySection({ children, className = "", pinDistance = 
       window.removeEventListener('resize', handleResize);
     };
   }, [pinDistance]);
+
+  // On mobile, just render children directly without any wrapper effects
+  if (isMobile) {
+    return <>{children}</>;
+  }
 
   return (
     <div ref={containerRef} className={`relative flex items-center justify-center ${className}`}>

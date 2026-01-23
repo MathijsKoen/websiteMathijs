@@ -25,12 +25,14 @@ export default function EnergyFieldTransition({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [wordStates, setWordStates] = useState<{ y: number; opacity: number; scale: number }[]>([]);
 
   const words = useMemo(() => title.split(" "), [title]);
 
   useEffect(() => {
     setMounted(true);
+    setIsMobile(window.innerWidth < 768);
     setWordStates(words.map(() => ({ y: 80, opacity: 0, scale: 0.8 })));
   }, [words]);
 
@@ -314,6 +316,29 @@ export default function EnergyFieldTransition({
       trigger.kill();
     };
   }, [mounted, words, colors]);
+
+  // Simple mobile version
+  if (isMobile) {
+    return (
+      <div id={id} className="relative py-16 flex flex-col items-center justify-center px-4">
+        <h2 className="text-4xl font-bold text-center leading-tight flex flex-wrap justify-center gap-x-2">
+          {words.map((word, i) => (
+            <span
+              key={i}
+              className="inline-block text-gradient"
+            >
+              {word}
+            </span>
+          ))}
+        </h2>
+        {subtitle && (
+          <p className="mt-6 text-base text-muted max-w-md text-center">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
