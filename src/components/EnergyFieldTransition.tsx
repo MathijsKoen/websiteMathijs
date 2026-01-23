@@ -37,6 +37,8 @@ export default function EnergyFieldTransition({
   }, [words]);
 
   useEffect(() => {
+    // Skip canvas animation on mobile
+    if (isMobile) return;
     if (!mounted) return;
 
     const container = containerRef.current;
@@ -315,7 +317,7 @@ export default function EnergyFieldTransition({
       window.removeEventListener("resize", resizeCanvas);
       trigger.kill();
     };
-  }, [mounted, words, colors]);
+  }, [mounted, isMobile, words, colors]);
 
   // Simple mobile version
   if (isMobile) {

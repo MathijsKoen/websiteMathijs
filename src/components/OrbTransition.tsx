@@ -36,6 +36,8 @@ export default function OrbTransition({
   }, []);
 
   useEffect(() => {
+    // Skip canvas animation on mobile
+    if (isMobile) return;
     if (!mounted) return;
 
     const container = containerRef.current;
@@ -295,7 +297,7 @@ export default function OrbTransition({
       window.removeEventListener("mousemove", handleMouse);
       trigger.kill();
     };
-  }, [mounted, title, stableColors]);
+  }, [mounted, isMobile, title, stableColors]);
 
   // Simple mobile version
   if (isMobile) {

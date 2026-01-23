@@ -285,18 +285,9 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
     setIsMobile(window.innerWidth < 768);
   }, []);
 
-  // Simple mobile version
-  if (isMobile && isMounted) {
-    return (
-      <div className={`relative w-full flex items-center justify-center py-16 ${className}`}>
-        <h2 className="text-4xl font-black tracking-tight text-gradient text-center">
-          {text}
-        </h2>
-      </div>
-    );
-  }
-
   useEffect(() => {
+    // Skip canvas animation on mobile
+    if (isMobile) return;
     if (!isMounted || !canvasRef.current || !containerRef.current) return;
 
     const canvas = canvasRef.current;
@@ -479,6 +470,17 @@ export default function OrbTextReveal({ text = "PORTFOLIO", className = "", heig
     const y = e.clientY - rect.top;
     rippleRef.current = [{ x, y, radius: 0, strength: 1 }];
   };
+
+  // Simple mobile version - after all hooks
+  if (isMobile && isMounted) {
+    return (
+      <div className={`relative w-full flex items-center justify-center py-16 ${className}`}>
+        <h2 className="text-4xl font-black tracking-tight text-gradient text-center">
+          {text}
+        </h2>
+      </div>
+    );
+  }
 
   return (
     <div
