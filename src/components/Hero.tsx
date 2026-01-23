@@ -142,7 +142,7 @@ export default function Hero() {
           className="text-4xl md:text-6xl lg:text-8xl font-bold mb-6 leading-tight"
           style={{ perspective: "1000px" }}
         >
-          Hallo, Wij zijn <span 
+          Hi, Wij zijn <span 
             className="inline-block animate-gradient"
             style={{
               backgroundImage: "linear-gradient(to right, #22d3ee, #3b82f6, #4f46e5)",

@@ -138,28 +138,28 @@ export default function About() {
                 ref={(el) => { textRefs.current[0] = el; }}
                 style={{ opacity: 0 }}
               >
-                Met meer dan 5 jaar ervaring in webdevelopment hebben wij het
-                voorrecht gehad om te werken met zowel startups als gevestigde
-                bedrijven, en hen te helpen hun digitale visies tot leven te
-                brengen.
+                Als gepassioneerde webdeveloper help ik ondernemers en startups
+                hun digitale dromen werkelijkheid te maken. Van concept tot
+                lancering—ik begeleid je door het volledige proces.
               </p>
 
               <p
                 ref={(el) => { textRefs.current[1] = el; }}
                 style={{ opacity: 0 }}
               >
-                Onze passie ligt in het creëren van naadloze gebruikerservaringen die
-                mooi design combineren met robuuste functionaliteit. Wij geloven
-                dat geweldige software onzichtbaar moet aanvoelen—het moet gewoon werken.
+                Mijn focus ligt op het bouwen van moderne, gebruiksvriendelijke
+                websites en applicaties die niet alleen mooi ogen, maar ook echt
+                resultaat opleveren. Persoonlijke aandacht en directe communicatie
+                staan bij mij centraal.
               </p>
 
               <p
                 ref={(el) => { textRefs.current[2] = el; }}
                 style={{ opacity: 0 }}
               >
-                Wanneer we niet aan het coderen zijn, vind je ons terwijl we nieuwe
-                technologieën verkennen, bijdragen aan open-source projecten, of kennis
-                delen met de developer community.
+                Door continu te leren en bij te blijven met de nieuwste
+                technologieën, kan ik je voorzien van toekomstbestendige
+                oplossingen die meegroeien met jouw ambities.
               </p>
             </div>
 
@@ -171,38 +171,38 @@ export default function About() {
               <div>
                 <span
                   className="stat-number text-2xl md:text-4xl lg:text-5xl font-bold text-gradient"
-                  data-value="5"
+                  data-value="100"
                 >
                   0
                 </span>
                 <span className="text-2xl md:text-4xl lg:text-5xl font-bold text-gradient">
-                  +
+                  %
                 </span>
-                <p className="text-muted text-xs md:text-sm mt-2">Jaar Ervaring</p>
+                <p className="text-muted text-xs md:text-sm mt-2">Toegewijd</p>
               </div>
               <div>
                 <span
                   className="stat-number text-2xl md:text-4xl lg:text-5xl font-bold text-gradient"
-                  data-value="50"
+                  data-value="24"
                 >
                   0
                 </span>
                 <span className="text-2xl md:text-4xl lg:text-5xl font-bold text-gradient">
-                  +
+                  /7
                 </span>
-                <p className="text-muted text-xs md:text-sm mt-2">Projecten Voltooid</p>
+                <p className="text-muted text-xs md:text-sm mt-2">Bereikbaar</p>
               </div>
               <div>
                 <span
                   className="stat-number text-2xl md:text-4xl lg:text-5xl font-bold text-gradient"
-                  data-value="30"
+                  data-value="1"
                 >
                   0
                 </span>
                 <span className="text-2xl md:text-4xl lg:text-5xl font-bold text-gradient">
-                  +
+                  :1
                 </span>
-                <p className="text-muted text-xs md:text-sm mt-2">Tevreden Klanten</p>
+                <p className="text-muted text-xs md:text-sm mt-2">Persoonlijk Contact</p>
               </div>
             </div>
           </div>

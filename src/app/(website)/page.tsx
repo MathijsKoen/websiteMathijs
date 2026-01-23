@@ -39,7 +39,7 @@ export default function Home() {
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full mb-6">
                 <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
                 <p className="text-accent font-mono text-sm tracking-wider">
-                  KEEP SCROLLING
+                  BLIJF SCROLLEN
                 </p>
               </div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
@@ -47,7 +47,7 @@ export default function Home() {
                 <span className="text-gradient block">Experiences</span>
               </h2>
               <p className="text-muted text-lg">
-                Where code meets creativity
+                Waar code en creativiteit samenkomen
               </p>
             </div>
           </ParticleTransition>
@@ -73,7 +73,6 @@ export default function Home() {
             id="projects-skills-transition"
             height={100}
             title="EXPERTISE"
-            subtitle="The tools and technologies I master"
             colors={["#06b6d4", "#3b82f6", "#8b5cf6", "#ffffff"]}
           />
         </StickySection>
