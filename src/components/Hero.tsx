@@ -134,15 +134,15 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto text-center">
         <p className="text-accent font-mono text-sm mb-4 tracking-wider">
-          Creating Digital Experiences
+          Digitale Ervaringen Creëren
         </p>
 
         <h1
           ref={titleRef}
-          className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+          className="text-4xl md:text-6xl lg:text-8xl font-bold mb-6 leading-tight"
           style={{ perspective: "1000px" }}
         >
-          Hi, We&apos;re <span 
+          Hallo, Wij zijn <span 
             className="inline-block animate-gradient"
             style={{
               backgroundImage: "linear-gradient(to right, #22d3ee, #3b82f6, #4f46e5)",
@@ -157,11 +157,11 @@ export default function Hero() {
 
         <p
           ref={subtitleRef}
-          className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12"
+          className="text-base md:text-lg lg:text-xl text-gray-400 max-w-2xl mx-auto mb-12 px-4"
         >
-          We craft exceptional digital experiences through clean code and
-          creative problem-solving. Specialized in building modern web
-          applications that users love.
+          Wij creëren uitzonderlijke digitale ervaringen door middel van clean code en
+          creatieve probleemoplossing. Gespecialiseerd in het bouwen van moderne web
+          applicaties waar gebruikers van houden.
         </p>
 
         <div
@@ -171,9 +171,9 @@ export default function Hero() {
         >
           <a
             href="#projects"
-            className="group flex items-center gap-2 px-8 py-4 bg-accent text-white rounded-full font-medium hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25 transition-all duration-300"
+            className="group flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-accent text-white rounded-full font-medium hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25 transition-all duration-300 text-sm md:text-base"
           >
-            View Our Work
+            Bekijk Ons Werk
             <svg
               className="w-5 h-5 group-hover:translate-x-1 transition-transform"
               fill="none"
@@ -190,9 +190,9 @@ export default function Hero() {
           </a>
           <a
             href="#contact"
-            className="flex items-center gap-2 px-8 py-4 border border-border rounded-full font-medium hover:border-accent hover:text-accent transition-colors duration-300"
+            className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 border border-border rounded-full font-medium hover:border-accent hover:text-accent transition-colors duration-300 text-sm md:text-base"
           >
-            Get In Touch
+            Neem Contact Op
           </a>
         </div>
       </div>
@@ -200,10 +200,10 @@ export default function Hero() {
       {/* Scroll indicator */}
       <div
         ref={scrollIndicatorRef}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         style={{ opacity: 0 }}
       >
-        <span className="text-muted text-sm">Scroll to explore</span>
+        <span className="text-muted text-xs md:text-sm">Scroll om te ontdekken</span>
         <div className="w-6 h-10 border-2 border-muted rounded-full flex justify-center p-1">
           <div className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" />
         </div>

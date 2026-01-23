@@ -114,7 +114,7 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative py-32 px-6 overflow-hidden"
+      className="relative py-16 md:py-32 px-4 md:px-6 overflow-hidden"
     >
       {/* Background elements */}
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
@@ -122,17 +122,17 @@ export default function Contact() {
 
       <div className="max-w-7xl mx-auto">
         {/* Title */}
-        <div ref={titleRef} className="text-center mb-16" style={{ opacity: 0 }}>
-          <p className="text-accent font-mono text-sm mb-4 tracking-wider">
-            GET IN TOUCH
+        <div ref={titleRef} className="text-center mb-12 md:mb-16 px-4" style={{ opacity: 0 }}>
+          <p className="text-accent font-mono text-xs md:text-sm mb-4 tracking-wider">
+            NEEM CONTACT OP
           </p>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold">
-            Let&apos;s Work{" "}
-            <span className="text-gradient">Together</span>
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold">
+            Laten We{" "}
+            <span className="text-gradient">Samenwerken</span>
           </h2>
-          <p className="text-muted text-lg mt-4 max-w-2xl mx-auto">
-            Have a project in mind? I&apos;d love to hear about it. Let&apos;s
-            discuss how we can bring your ideas to life.
+          <p className="text-muted text-base md:text-lg mt-4 max-w-2xl mx-auto">
+            Heeft u een project in gedachten? Wij horen er graag over. Laten we
+            bespreken hoe we uw ideeën tot leven kunnen brengen.
           </p>
         </div>
 
@@ -149,7 +149,7 @@ export default function Contact() {
                 htmlFor="name"
                 className="block text-sm font-medium mb-2"
               >
-                Name
+                Naam
               </label>
               <input
                 type="text"
@@ -158,8 +158,8 @@ export default function Contact() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-4 bg-transparent border border-border rounded-xl focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
-                placeholder="Your name"
+                className="w-full px-4 py-3 md:py-4 bg-transparent border border-border rounded-xl focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                placeholder="Uw naam"
               />
             </div>
 
@@ -168,7 +168,7 @@ export default function Contact() {
                 htmlFor="email"
                 className="block text-sm font-medium mb-2"
               >
-                Email
+                E-mail
               </label>
               <input
                 type="email"
@@ -177,8 +177,8 @@ export default function Contact() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-4 bg-transparent border border-border rounded-xl focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
-                placeholder="your@email.com"
+                className="w-full px-4 py-3 md:py-4 bg-transparent border border-border rounded-xl focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                placeholder="uw@email.nl"
               />
             </div>
 
@@ -187,7 +187,7 @@ export default function Contact() {
                 htmlFor="message"
                 className="block text-sm font-medium mb-2"
               >
-                Message
+                Bericht
               </label>
               <textarea
                 id="message"
@@ -196,8 +196,8 @@ export default function Contact() {
                 onChange={handleChange}
                 required
                 rows={6}
-                className="w-full px-4 py-4 bg-transparent border border-border rounded-xl focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors resize-none"
-                placeholder="Tell me about your project..."
+                className="w-full px-4 py-3 md:py-4 bg-transparent border border-border rounded-xl focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors resize-none"
+                placeholder="Vertel ons over uw project..."
               />
             </div>
 
@@ -231,7 +231,7 @@ export default function Contact() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  Sending...
+                  Verzenden...
                 </>
               ) : submitted ? (
                 <>
@@ -248,11 +248,11 @@ export default function Contact() {
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  Message Sent!
+                  Bericht Verzonden!
                 </>
               ) : (
                 <>
-                  Send Message
+                  Verstuur Bericht
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -296,10 +296,10 @@ export default function Contact() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium mb-1">Email</h3>
+                  <h3 className="font-medium mb-1">E-mail</h3>
                   <a
                     href="mailto:info@novumdigital.nl"
-                    className="text-muted hover:text-accent transition-colors"
+                    className="text-muted hover:text-accent transition-colors text-sm md:text-base"
                   >
                     info@novumdigital.nl
                   </a>
@@ -332,15 +332,15 @@ export default function Contact() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium mb-1">Location</h3>
-                  <p className="text-muted">Netherlands 🇳🇱</p>
+                  <h3 className="font-medium mb-1">Locatie</h3>
+                  <p className="text-muted">Nederland 🇳🇱</p>
                 </div>
               </div>
             </div>
 
             {/* Social Links */}
             <div className="glass rounded-2xl p-6">
-              <h3 className="font-medium mb-4">Connect with me</h3>
+              <h3 className="font-medium mb-4">Verbind met ons</h3>
               <div className="flex gap-4">
                 <a
                   href="https://github.com"
@@ -385,9 +385,9 @@ export default function Contact() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                 </span>
-                <p>
-                  <span className="font-medium">Currently available</span>
-                  <span className="text-muted"> for freelance work</span>
+                <p className="text-sm md:text-base">
+                  <span className="font-medium">Momenteel beschikbaar</span>
+                  <span className="text-muted"> voor freelance werk</span>
                 </p>
               </div>
             </div>

@@ -8,9 +8,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 const navItems = [
   { name: "Home", href: "#hero" },
-  { name: "About", href: "#about" },
-  { name: "Projects", href: "#projects" },
-  { name: "Skills", href: "#skills" },
+  { name: "Over Ons", href: "#about" },
+  { name: "Projecten", href: "#projects" },
+  { name: "Diensten", href: "#skills" },
   { name: "Contact", href: "#contact" },
 ];
 
@@ -130,7 +130,7 @@ export default function Navigation() {
           onClick={(e) => handleNavClick(e, "#contact")}
           className="hidden md:flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-full text-sm font-medium hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25 transition-all duration-300"
         >
-          Let&apos;s Talk
+          Neem Contact Op
           <svg
             className="w-4 h-4"
             fill="none"
@@ -200,7 +200,7 @@ export default function Navigation() {
             onClick={(e) => handleNavClick(e, "#contact")}
             className="mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-accent text-white rounded-full text-sm font-medium"
           >
-            Let&apos;s Talk
+            Neem Contact Op
           </a>
         </div>
       </div>

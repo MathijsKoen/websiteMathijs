@@ -118,91 +118,91 @@ export default function About() {
     <section
       ref={sectionRef}
       id="about"
-      className="relative py-32 px-6 overflow-hidden"
+      className="relative py-16 md:py-32 px-4 md:px-6 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-16 items-center">
           {/* Text Content */}
           <div>
             <h2
               ref={titleRef}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8"
+              className="text-3xl md:text-4xl lg:text-6xl font-bold mb-8"
               style={{ opacity: 0 }}
             >
-              About{" "}
-              <span className="text-gradient">Us</span>
+              Over{" "}
+              <span className="text-gradient">Ons</span>
             </h2>
 
-            <div className="space-y-6 text-muted text-lg">
+            <div className="space-y-6 text-muted text-base md:text-lg">
               <p
                 ref={(el) => { textRefs.current[0] = el; }}
                 style={{ opacity: 0 }}
               >
-                With over 5 years of experience in web development, We&apos;ve
-                had the privilege of working with startups and established
-                companies alike, helping them bring their digital visions to
-                life.
+                Met meer dan 5 jaar ervaring in webdevelopment hebben wij het
+                voorrecht gehad om te werken met zowel startups als gevestigde
+                bedrijven, en hen te helpen hun digitale visies tot leven te
+                brengen.
               </p>
 
               <p
                 ref={(el) => { textRefs.current[1] = el; }}
                 style={{ opacity: 0 }}
               >
-                Our passion lies in creating seamless user experiences that
-                combine beautiful design with robust functionality. We believe
-                that great software should feel invisible—it should just work.
+                Onze passie ligt in het creëren van naadloze gebruikerservaringen die
+                mooi design combineren met robuuste functionaliteit. Wij geloven
+                dat geweldige software onzichtbaar moet aanvoelen—het moet gewoon werken.
               </p>
 
               <p
                 ref={(el) => { textRefs.current[2] = el; }}
                 style={{ opacity: 0 }}
               >
-                When we&apos;re not coding, you&apos;ll find us exploring new
-                technologies, contributing to open-source projects, or sharing
-                knowledge with the developer community.
+                Wanneer we niet aan het coderen zijn, vind je ons terwijl we nieuwe
+                technologieën verkennen, bijdragen aan open-source projecten, of kennis
+                delen met de developer community.
               </p>
             </div>
 
             {/* Stats */}
             <div
               ref={statsRef}
-              className="grid grid-cols-3 gap-8 mt-12 pt-12 border-t border-border"
+              className="grid grid-cols-3 gap-4 md:gap-8 mt-12 pt-12 border-t border-border"
             >
               <div>
                 <span
-                  className="stat-number text-4xl md:text-5xl font-bold text-gradient"
+                  className="stat-number text-2xl md:text-4xl lg:text-5xl font-bold text-gradient"
                   data-value="5"
                 >
                   0
                 </span>
-                <span className="text-4xl md:text-5xl font-bold text-gradient">
+                <span className="text-2xl md:text-4xl lg:text-5xl font-bold text-gradient">
                   +
                 </span>
-                <p className="text-muted text-sm mt-2">Years Experience</p>
+                <p className="text-muted text-xs md:text-sm mt-2">Jaar Ervaring</p>
               </div>
               <div>
                 <span
-                  className="stat-number text-4xl md:text-5xl font-bold text-gradient"
+                  className="stat-number text-2xl md:text-4xl lg:text-5xl font-bold text-gradient"
                   data-value="50"
                 >
                   0
                 </span>
-                <span className="text-4xl md:text-5xl font-bold text-gradient">
+                <span className="text-2xl md:text-4xl lg:text-5xl font-bold text-gradient">
                   +
                 </span>
-                <p className="text-muted text-sm mt-2">Projects Completed</p>
+                <p className="text-muted text-xs md:text-sm mt-2">Projecten Voltooid</p>
               </div>
               <div>
                 <span
-                  className="stat-number text-4xl md:text-5xl font-bold text-gradient"
+                  className="stat-number text-2xl md:text-4xl lg:text-5xl font-bold text-gradient"
                   data-value="30"
                 >
                   0
                 </span>
-                <span className="text-4xl md:text-5xl font-bold text-gradient">
+                <span className="text-2xl md:text-4xl lg:text-5xl font-bold text-gradient">
                   +
                 </span>
-                <p className="text-muted text-sm mt-2">Happy Clients</p>
+                <p className="text-muted text-xs md:text-sm mt-2">Tevreden Klanten</p>
               </div>
             </div>
           </div>
@@ -237,11 +237,11 @@ export default function About() {
             <div className="absolute -bottom-4 -left-4 w-32 h-32 border border-accent-light/20 rounded-2xl" />
 
             {/* Floating badge */}
-            <div className="absolute -right-6 top-1/4 glass px-4 py-3 rounded-xl">
-              <p className="text-sm font-medium">Available for work</p>
+            <div className="absolute -right-2 md:-right-6 top-1/4 glass px-3 md:px-4 py-2 md:py-3 rounded-xl">
+              <p className="text-xs md:text-sm font-medium">Beschikbaar voor werk</p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-xs text-muted">Remote / Hybrid</span>
+                <span className="text-xs text-muted">Remote / Hybride</span>
               </div>
             </div>
           </div>

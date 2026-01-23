@@ -9,35 +9,19 @@ gsap.registerPlugin(ScrollTrigger);
 const projects = [
   {
     id: 1,
-    title: "E-Commerce Platform",
-    description: "A full-stack e-commerce solution with real-time inventory management and AI-powered recommendations.",
-    tags: ["Next.js", "TypeScript", "Prisma", "Stripe"],
+    title: "Order Fulfillment Platform",
+    description: "Een volledig geïntegreerd order fulfillment platform voor Ksyos dat via API's communiceert met verzend- en CRM-systemen voor naadloze orderverwerking.",
+    tags: ["Next.js", "TypeScript", "REST API", "CRM Integratie"],
     color: "#3b82f6",
-    image: "https://images.unsplash.com/photo-1661956602116-aa6865609028?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80",
   },
   {
     id: 2,
-    title: "Analytics Dashboard",
-    description: "Real-time data visualization platform with customizable widgets and automated reporting.",
-    tags: ["React", "D3.js", "Node.js", "PostgreSQL"],
+    title: "Neonatologie Dashboard",
+    description: "Een real-time dashboard voor de Neonatologie IC van het AMC met directe API-connectie tot het research data platform voor betere patiëntenzorg.",
+    tags: ["React", "API Integratie", "Data Visualisatie", "Healthcare"],
     color: "#8b5cf6",
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
-  },
-  {
-    id: 3,
-    title: "Mobile Banking App",
-    description: "Secure and intuitive mobile banking experience with biometric authentication.",
-    tags: ["React Native", "TypeScript", "Firebase"],
-    color: "#06b6d4",
-    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80",
-  },
-  {
-    id: 4,
-    title: "AI Content Generator",
-    description: "Machine learning powered content creation tool for marketing teams.",
-    tags: ["Python", "TensorFlow", "FastAPI", "React"],
-    color: "#f59e0b",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
   },
 ];
 
@@ -268,22 +252,22 @@ export default function Projects() {
       <section
         ref={sectionRef}
         id="projects"
-        className="flex items-center gap-8 px-[10vw] py-20 min-h-screen relative z-10"
+        className="flex flex-col md:flex-row items-center gap-6 md:gap-8 px-4 md:px-[10vw] py-12 md:py-20 min-h-screen relative z-10"
         style={{ width: "fit-content" }}
       >
         {/* Section Title */}
-        <div className="flex-shrink-0 w-[40vw] pr-20">
-          <h2 className="text-5xl md:text-7xl font-bold mb-6 text-foreground">
-            <span className="text-gradient">Featured</span>
+        <div className="flex-shrink-0 w-full md:w-[40vw] pr-4 md:pr-20 mb-8 md:mb-0">
+          <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 text-foreground">
+            <span className="text-gradient">Uitgelichte</span>
             <br />
-            Projects
+            Projecten
           </h2>
-          <p className="text-lg text-muted max-w-md">
-            A selection of projects that showcase our expertise in building
-            scalable, user-centric digital solutions.
+          <p className="text-base md:text-lg text-muted max-w-md">
+            Een selectie van projecten die onze expertise tonen in het bouwen
+            van schaalbare, gebruikersgerichte digitale oplossingen.
           </p>
-          <div className="mt-8 flex items-center gap-4">
-            <span className="text-sm text-muted">Scroll horizontally</span>
+          <div className="mt-8 hidden md:flex items-center gap-4">
+            <span className="text-sm text-muted">Scroll horizontaal</span>
             <svg
               className="w-6 h-6 text-[var(--accent)] animate-pulse"
               fill="none"
@@ -304,7 +288,7 @@ export default function Projects() {
         {projects.map((project) => (
           <div
             key={project.id}
-            className="flex-shrink-0 w-[500px] h-[600px] rounded-3xl overflow-hidden relative group"
+            className="flex-shrink-0 w-[85vw] md:w-[500px] h-[450px] md:h-[600px] rounded-3xl overflow-hidden relative group"
             style={{
               transform: getCardTransform(project.id),
               transition: activeCard === project.id ? "transform 0.1s ease-out" : "transform 0.3s ease-out",
@@ -363,7 +347,7 @@ export default function Projects() {
 
               {/* View Project Button */}
               <button className="mt-6 flex items-center gap-2 text-white/90 hover:text-white transition-colors opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                <span>View Project</span>
+                <span>Bekijk Project</span>
                 <svg
                   className="w-5 h-5"
                   fill="none"

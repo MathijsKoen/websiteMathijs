@@ -8,31 +8,19 @@ gsap.registerPlugin(ScrollTrigger);
 
 const skills = [
   {
-    category: "Frontend",
-    items: [
-      { name: "React / Next.js", level: 95 },
-      { name: "TypeScript", level: 90 },
-      { name: "Tailwind CSS", level: 95 },
-      { name: "Vue.js", level: 80 },
-    ],
+    category: "Webdevelopment",
+    description: "Moderne websites en webapplicaties gebouwd met de nieuwste technologieën zoals React, Next.js en TypeScript.",
+    icon: "🌐",
   },
   {
-    category: "Backend",
-    items: [
-      { name: "Node.js", level: 90 },
-      { name: "Python", level: 85 },
-      { name: "PostgreSQL", level: 85 },
-      { name: "GraphQL", level: 80 },
-    ],
+    category: "API Integratie",
+    description: "Naadloze koppelingen tussen systemen via REST API's, webhooks en real-time data synchronisatie.",
+    icon: "🔗",
   },
   {
-    category: "Tools & DevOps",
-    items: [
-      { name: "Git / GitHub", level: 95 },
-      { name: "Docker", level: 85 },
-      { name: "AWS / Vercel", level: 80 },
-      { name: "CI/CD", level: 85 },
-    ],
+    category: "Hosting",
+    description: "Betrouwbare hosting en deployment oplossingen met focus op snelheid, veiligheid en schaalbaarheid.",
+    icon: "☁️",
   },
 ];
 
@@ -190,28 +178,23 @@ export default function Skills() {
         }
       );
 
-      // Skills cards stagger animation - MORE WOW
+      // Skills cards stagger animation
       const skillCards = skillsRef.current?.querySelectorAll(".skill-category");
       if (skillCards) {
         gsap.fromTo(
           skillCards,
           { 
             opacity: 0, 
-            y: 150, 
-            rotationX: 45, 
-            transformOrigin: "center top", 
-            scale: 0.5,
-            rotationY: (i) => i % 2 === 0 ? -15 : 15, // Alternating tilt
+            y: 80, 
+            scale: 0.9,
           },
           {
             opacity: 1,
             y: 0,
-            rotationX: 0,
-            rotationY: 0,
             scale: 1,
-            duration: 1.4,
-            stagger: 0.15,
-            ease: "elastic.out(0.8, 0.5)", // More bouncy/elastic
+            duration: 1,
+            stagger: 0.2,
+            ease: "power3.out",
             scrollTrigger: {
               trigger: skillsRef.current,
               start: "top 75%",
@@ -221,40 +204,6 @@ export default function Skills() {
           }
         );
       }
-
-      // Skill bars animation - MORE DYNAMIC
-      const skillBars = sectionRef.current?.querySelectorAll(".skill-bar-fill");
-      skillBars?.forEach((bar) => {
-        const level = bar.getAttribute("data-level");
-        
-        // Reset scale first
-        gsap.set(bar, { scaleX: 0 });
-        
-        gsap.fromTo(
-          bar,
-          { scaleX: 0 },
-          {
-            scaleX: parseInt(level || "0", 10) / 100,
-            duration: 2,
-            ease: "elastic.out(1, 0.5)",
-            scrollTrigger: {
-              trigger: bar,
-              start: "top 95%",
-              toggleActions: "play none none reverse",
-            },
-            onComplete: () => {
-              // Add a subtle shimmer/pulse after loading
-              gsap.to(bar, {
-                filter: "brightness(1.2)",
-                duration: 1,
-                yoyo: true,
-                repeat: -1,
-                ease: "sine.inOut"
-              });
-            }
-          }
-        );
-      });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -264,7 +213,7 @@ export default function Skills() {
     <section
       ref={sectionRef}
       id="skills"
-      className="relative py-8 px-6 overflow-hidden flex flex-col justify-center min-h-[80vh]"
+      className="relative py-12 md:py-8 px-4 md:px-6 overflow-hidden flex flex-col justify-center min-h-[80vh]"
     >
       <canvas 
         ref={canvasRef} 
@@ -278,62 +227,45 @@ export default function Skills() {
             EXPERTISE
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-            Skills &{" "}
-            <span className="text-gradient">Technologies</span>
+            Onze{" "}
+            <span className="text-gradient">Diensten</span>
           </h2>
         </div>
 
         {/* Skills Grid */}
         <div
           ref={skillsRef}
-          className="grid md:grid-cols-3 gap-6 mb-10"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"
           style={{ perspective: "1000px" }}
         >
-          {skills.map((category, categoryIndex) => (
+          {skills.map((skill) => (
             <div
-              key={category.category}
-              className="skill-category glass rounded-xl p-5"
+              key={skill.category}
+              className="skill-category glass rounded-xl p-6 md:p-8 text-center hover:bg-accent/5 transition-colors duration-300"
               style={{ opacity: 0 }}
             >
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-accent/20 flex items-center justify-center text-accent text-xs">
-                  {categoryIndex + 1}
-                </span>
-                {category.category}
+              <div className="text-4xl md:text-5xl mb-4">{skill.icon}</div>
+              <h3 className="text-lg md:text-xl font-bold mb-3">
+                {skill.category}
               </h3>
-
-              <div className="space-y-3">
-                {category.items.map((skill) => (
-                  <div key={skill.name}>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs font-medium">{skill.name}</span>
-                      <span className="text-xs text-muted">{skill.level}%</span>
-                    </div>
-                    <div className="skill-bar h-1">
-                      <div
-                        className="skill-bar-fill"
-                        data-level={skill.level}
-                        style={{ transform: "scaleX(0)" }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm md:text-base text-muted">
+                {skill.description}
+              </p>
             </div>
           ))}
         </div>
 
         {/* Core Services Grid - Replaces Skills Marquee */}
-        <div className="grid md:grid-cols-2 gap-6 mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
           <div className="glass rounded-xl p-6 hover:bg-accent/5 transition-colors duration-300">
             <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
               <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              Problem Solving
+              Probleemoplossend
             </h3>
             <p className="text-sm text-muted">
-              I break down complex challenges into manageable, scalable technical solutions. From architecture to implementation, every step is calculated.
+              Wij breken complexe uitdagingen af tot beheersbare, schaalbare technische oplossingen. Van architectuur tot implementatie, elke stap is doordacht.
             </p>
           </div>
 
@@ -342,10 +274,10 @@ export default function Skills() {
                <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              High Performance
+              Hoge Prestaties
             </h3>
             <p className="text-sm text-muted">
-              Building applications that are fast, responsive, and optimized for the best user experience and SEO rankings.
+              Applicaties bouwen die snel, responsief en geoptimaliseerd zijn voor de beste gebruikerservaring en SEO-rankings.
             </p>
           </div>
         </div>
